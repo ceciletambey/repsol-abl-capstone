@@ -408,3 +408,32 @@ def build_footprint(category_answers, pd_answers, role=None):
         footprint["personal_development"] = {"priority_skill": PD_PRIORITY_IDS[priority_idx]}
 
     return footprint
+
+
+def evaluate_outcome(before, after, required_level, reassessment_result):
+    """Judge the re-assessment outcome, not just report the numbers. Success
+    means meeting the role's actual requirement — "improved a bit but still
+    below what the job needs" is not a pass."""
+    delta = after - before
+
+    if reassessment_result["knowledge_gap"]:
+        return ("BAD",
+            "Still flagged overconfident on the follow-up knowledge check — claiming "
+            "more than you can back up. This needs another pass before it counts as resolved.")
+
+    if required_level is not None:
+        if after >= required_level:
+            return ("GOOD",
+                f"Level {after} meets the role's required level {required_level} for this skill. Gap closed.")
+        if delta > 0:
+            return ("NEEDS WORK",
+                f"Improved from level {before} to {after}, but still below the required level "
+                f"{required_level}. Keep going on this skill.")
+        return ("BAD",
+            f"No improvement — still at level {after}, below the required level {required_level}.")
+
+    if delta > 0:
+        return ("GOOD", f"Improved from level {before} to {after}.")
+    if delta == 0:
+        return ("NEEDS WORK", f"No change — still at level {after}.")
+    return ("BAD", f"Regressed from level {before} to {after}.")

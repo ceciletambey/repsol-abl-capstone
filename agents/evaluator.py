@@ -28,28 +28,38 @@ def get_llm():
 def evaluator_node(state):
     skill = state.get("detected_skill", "")
     level = state.get("detected_level")
+    required_level = state.get("required_level")
     is_knowledge_gap = state.get("is_knowledge_gap", False)
     nudge = state.get("final_nudge", {})
     content = nudge.get("content", "")
 
-    questions = _generate_quiz(skill, level, is_knowledge_gap, content)
+    questions = _generate_quiz(skill, level, required_level, is_knowledge_gap, content)
 
     return {
         "reassessment": {
             "skill": skill,
             "baseline_level": level,
+            "required_level": required_level,
             "based_on": nudge.get("title") or content[:80],
             "questions": questions,
         }
     }
 
 
-def _generate_quiz(skill, level, is_knowledge_gap, content):
+def _generate_quiz(skill, level, required_level, is_knowledge_gap, content):
     if is_knowledge_gap:
         goal = (
             "They previously claimed confidence but failed a knowledge check, so "
             "the goal now is to verify their FOUNDATIONAL understanding is solid "
             "— don't test advanced material they weren't given."
+        )
+    elif required_level:
+        goal = (
+            f"They started at level {level} but their ROLE REQUIRES level "
+            f"{required_level} (1=Awareness, 2=Basic, 3=Intermediate, 4=Expert) "
+            f"for this skill, so the goal is specifically to check whether they "
+            f"now perform at level {required_level}, not just whether they "
+            f"improved at all."
         )
     else:
         goal = (

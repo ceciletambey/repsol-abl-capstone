@@ -19,7 +19,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from assessment.data import CATEGORIES, PD_QUESTIONS, ROLES, build_footprint, score_questions
+from assessment.data import CATEGORIES, PD_QUESTIONS, ROLES, build_footprint, evaluate_outcome, score_questions
+from agents.observer import detect_gap
 
 st.set_page_config(page_title="Repsol ABL", page_icon="🎯", layout="centered")
 
@@ -91,9 +92,28 @@ else:
             st.session_state.pop(key, None)
         st.rerun()
 
-# ============ STEP 2: RUN PIPELINE ============
+# ============ STEP 2: PICK A FOCUS SKILL (auto-suggested, overridable) ============
 if "footprint" in st.session_state and "pipeline_result" not in st.session_state:
-    st.header("2 · Run the ABL pipeline")
+    st.header("2 · Choose a skill to work on")
+    footprint = st.session_state["footprint"]
+    skill_data = {k: v for k, v in footprint.items() if k != "personal_development"}
+    pd_data = footprint.get("personal_development", {})
+    suggested, reason = detect_gap(skill_data, pd_data)
+
+    reason_text = {
+        "knowledge_gap": "an overconfidence flag on a skill behind your role's requirement",
+        "role_requirement": "the biggest gap against your role's actual requirement",
+        "personal_development": "your stated personal development priority",
+        "lowest_level": "your lowest-scoring category",
+    }.get(reason, reason)
+    st.caption(f"Suggested: **{suggested}** — based on {reason_text}. Pick a different one if you'd rather work on something else.")
+
+    skill_ids = list(skill_data.keys())
+    chosen = st.selectbox("Skill to focus on", skill_ids, index=skill_ids.index(suggested))
+
+# ============ STEP 3: RUN PIPELINE ============
+if "footprint" in st.session_state and "pipeline_result" not in st.session_state:
+    st.header("3 · Run the ABL pipeline")
     if st.button("▶ Run pipeline", type="primary"):
         try:
             from graph.build_graph import app as pipeline
@@ -101,6 +121,7 @@ if "footprint" in st.session_state and "pipeline_result" not in st.session_state
             with st.spinner("Observer → Curate → Format → Deliver → Evaluate..."):
                 result = pipeline.invoke({
                     "footprint": json.dumps(st.session_state["footprint"]),
+                    "chosen_skill": chosen,
                     "delivery_format": st.session_state["delivery_format"],
                     "loop_step": 0,
                     "messages": [],
@@ -112,9 +133,9 @@ if "footprint" in st.session_state and "pipeline_result" not in st.session_state
             st.caption("If this is an auth error, set GOOGLE_API_KEY (and TAVILY_API_KEY) "
                        "in Streamlit secrets or your local .env.")
 
-# ============ STEP 3: SHOW THE NUDGE ============
+# ============ STEP 4: SHOW THE NUDGE ============
 if "pipeline_result" in st.session_state:
-    st.header("2 · Run the ABL pipeline")
+    st.header("3 · Run the ABL pipeline")
     nudge = st.session_state["pipeline_result"]["final_nudge"]
     st.success(f"Detected gap: **{nudge['skill']}**")
 
@@ -129,8 +150,8 @@ if "pipeline_result" in st.session_state:
     with st.expander("Raw nudge payload (JSON)"):
         st.json(nudge)
 
-    # ============ STEP 4: THE EVALUATOR'S RE-ASSESSMENT ============
-    st.header("3 · Re-assessment — after you've gone through the content")
+    # ============ STEP 5: THE EVALUATOR'S RE-ASSESSMENT ============
+    st.header("4 · Re-assessment — after you've gone through the content")
     reassessment = st.session_state["pipeline_result"].get("reassessment", {})
     questions = reassessment.get("questions", [])
 
@@ -158,14 +179,18 @@ if "pipeline_result" in st.session_state:
     else:
         before = st.session_state["pipeline_result"]["detected_level"]
         after = st.session_state["reassessment_result"]["final"]
+        required = reassessment.get("required_level")
         delta = after - before
+
         c1, c2, c3 = st.columns(3)
         c1.metric("Before", before)
         c2.metric("After", after)
         c3.metric("Progression", f"+{delta}" if delta >= 0 else str(delta))
-        if delta > 0:
-            st.success("Skill gap reduced — the ABL loop worked. This delta is your evaluation metric.")
-        elif st.session_state["reassessment_result"]["knowledge_gap"]:
-            st.warning("Still an overconfidence gap on the follow-up knowledge check — needs another pass.")
+
+        verdict, explanation = evaluate_outcome(before, after, required, st.session_state["reassessment_result"])
+        if verdict == "GOOD":
+            st.success(f"✅ GOOD — {explanation}")
+        elif verdict == "NEEDS WORK":
+            st.warning(f"🟡 NEEDS WORK — {explanation}")
         else:
-            st.warning("No improvement registered yet.")
+            st.error(f"❌ BAD — {explanation}")

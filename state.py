@@ -13,8 +13,10 @@ from langgraph.graph.message import add_messages
 
 class ABLState(TypedDict):
     footprint: str                  # raw trigger (e.g. assessment JSON export)
+    chosen_skill: str               # optional: employee's own pick, overrides auto-detection
     detected_skill: str             # Digcomp skill code, e.g. "power_bi"
     detected_level: int             # the employee's baseline level (1-4) for detected_skill
+    required_level: int             # the role's required level for detected_skill, if any (None otherwise)
     is_knowledge_gap: bool          # True if this gap is an overconfidence cap, not just low level
     skill_gap: str                  # human-readable description of the gap
     candidate_content: List[dict]   # content chunks retrieved from the vector DB
