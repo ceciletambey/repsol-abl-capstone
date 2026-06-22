@@ -19,5 +19,7 @@ def delivery_node(state):
         "content": chosen.get("text", "No content available"),
         "source": chosen.get("source", "n/a"),
         "format": chosen.get("format", "text"),
+        "url": chosen.get("url"),
+        "title": chosen.get("title"),
     }
     return {"final_nudge": nudge}

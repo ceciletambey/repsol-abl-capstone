@@ -14,9 +14,13 @@ from langgraph.graph.message import add_messages
 class ABLState(TypedDict):
     footprint: str                  # raw trigger (e.g. assessment JSON export)
     detected_skill: str             # Digcomp skill code, e.g. "power_bi"
+    detected_level: int             # the employee's baseline level (1-4) for detected_skill
+    is_knowledge_gap: bool          # True if this gap is an overconfidence cap, not just low level
     skill_gap: str                  # human-readable description of the gap
     candidate_content: List[dict]   # content chunks retrieved from the vector DB
     filtered_content: List[dict]    # chunks that survived relevance grading
     final_nudge: dict               # delivery payload (the "nudge")
+    delivery_format: str            # "text" or "audio" — drives the Formatter
+    reassessment: dict              # Evaluator's personalised follow-up quiz
     loop_step: int                  # caps the self-correct loop (avoid infinite loops)
     messages: Annotated[list, add_messages]

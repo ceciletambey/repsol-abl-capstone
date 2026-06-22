@@ -41,13 +41,27 @@ pip install -r requirements.txt
 cp .env.example .env             # then paste your real keys into .env
 ```
 
-## Run
+## Live app (Streamlit)
+
+Run locally:
 
 ```bash
-python smoke_test.py             # 1. verify Gemini auth  → "ABL pipeline online"
-python -m ingestion.build_vectorstore   # 2. build the Chroma vector store
-python -m graph.build_graph      # 3. run the full pipeline → prints the final nudge
+streamlit run app.py
 ```
+
+Deploy a public link:
+
+1. Push the repo to GitHub.
+2. Go to https://share.streamlit.io, connect the repo, set the main file to `app.py`.
+3. In the app's **Settings → Secrets**, add your key:
+   ```
+   GOOGLE_API_KEY = "your_real_key"
+   ```
+4. Deploy. You get a public URL like the Smart Scheduler one.
+
+Never put the real key in the repo — Streamlit Cloud injects it from Secrets.
+
+## Run (pipeline only, no UI)
 
 The pipeline runs even before the vector store is built — the Retriever falls
 back to stubs — so you can test wiring first and add real content later.
@@ -69,3 +83,9 @@ without telling everyone. Each person works on a branch and opens a PR.
   ingestion *script*, not the built vector store — teammates rebuild it locally.
 - `temperature=0` across all agents keeps demo runs reproducible.
 - The Microsoft tools in the Repsol brief are what we *replace*, not a dependency.
+
+```bash
+python smoke_test.py             # verify Gemini auth → "ABL pipeline online"
+python -m ingestion.build_vectorstore   # build the Chroma vector store
+python -m graph.build_graph      # run the pipeline → prints the final nudge
+```

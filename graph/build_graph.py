@@ -19,7 +19,9 @@ from agents.skill_matcher import (
     decide_to_generate,
 )
 from agents.curator import curator_node
+from agents.formatter import formatter_node
 from agents.delivery import delivery_node
+from agents.evaluator import evaluator_node
 
 workflow = StateGraph(ABLState)
 
@@ -29,7 +31,9 @@ workflow.add_node("retrieve", retriever_node)
 workflow.add_node("grade", grade_content_node)
 workflow.add_node("transform_query", transform_query_node)
 workflow.add_node("curate", curator_node)
+workflow.add_node("format", formatter_node)
 workflow.add_node("deliver", delivery_node)
+workflow.add_node("evaluate", evaluator_node)
 
 # --- Edges ---
 workflow.add_edge(START, "observer")
@@ -44,8 +48,10 @@ workflow.add_conditional_edges(
 )
 workflow.add_edge("transform_query", "retrieve")   # the loop back
 
-workflow.add_edge("curate", "deliver")
-workflow.add_edge("deliver", END)
+workflow.add_edge("curate", "format")
+workflow.add_edge("format", "deliver")
+workflow.add_edge("deliver", "evaluate")
+workflow.add_edge("evaluate", END)
 
 app = workflow.compile()
 

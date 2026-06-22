@@ -15,3 +15,6 @@ chroma_db/
 .DS_Store
 .vscode/
 .idea/
+
+# Streamlit local secrets
+.streamlit/secrets.toml
