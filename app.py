@@ -88,13 +88,13 @@ else:
                 note = f"below role requirement"
             st.metric(label, v["level"], note)
     if st.button("Retake assessment"):
-        for key in ["footprint", "delivery_format", "pipeline_result", "show_reassessment", "reassessment_result"]:
+        for key in ["footprint", "delivery_format", "pipeline_results", "show_reassessment", "reassessment_results"]:
             st.session_state.pop(key, None)
         st.rerun()
 
-# ============ STEP 2: PICK A FOCUS SKILL (auto-suggested, overridable) ============
-if "footprint" in st.session_state and "pipeline_result" not in st.session_state:
-    st.header("2 · Choose a skill to work on")
+# ============ STEP 2: PICK SKILLS TO WORK ON (auto-suggested, overridable, multiple) ============
+if "footprint" in st.session_state and "pipeline_results" not in st.session_state:
+    st.header("2 · Choose skills to work on")
     footprint = st.session_state["footprint"]
     skill_data = {k: v for k, v in footprint.items() if k != "personal_development"}
     pd_data = footprint.get("personal_development", {})
@@ -106,102 +106,123 @@ if "footprint" in st.session_state and "pipeline_result" not in st.session_state
         "personal_development": "your stated personal development priority",
         "lowest_level": "your lowest-scoring category",
     }.get(reason, reason)
-    st.caption(f"Suggested: **{suggested}** — based on {reason_text}. Pick a different one if you'd rather work on something else.")
+    st.caption(f"Suggested: **{suggested}** — based on {reason_text}. You can work on more than one at a time.")
 
     skill_ids = list(skill_data.keys())
-    chosen = st.selectbox("Skill to focus on", skill_ids, index=skill_ids.index(suggested))
+    chosen_skills = st.multiselect("Skills to focus on", skill_ids, default=[suggested])
 
-# ============ STEP 3: RUN PIPELINE ============
-if "footprint" in st.session_state and "pipeline_result" not in st.session_state:
+# ============ STEP 3: RUN PIPELINE (once per chosen skill) ============
+if "footprint" in st.session_state and "pipeline_results" not in st.session_state:
     st.header("3 · Run the ABL pipeline")
     if st.button("▶ Run pipeline", type="primary"):
-        try:
-            from graph.build_graph import app as pipeline
+        if not chosen_skills:
+            st.error("Pick at least one skill.")
+        else:
+            try:
+                from graph.build_graph import app as pipeline
 
-            with st.spinner("Observer → Curate → Format → Deliver → Evaluate..."):
-                result = pipeline.invoke({
-                    "footprint": json.dumps(st.session_state["footprint"]),
-                    "chosen_skill": chosen,
-                    "delivery_format": st.session_state["delivery_format"],
-                    "loop_step": 0,
-                    "messages": [],
-                })
-            st.session_state["pipeline_result"] = result
-            st.rerun()
-        except Exception as e:
-            st.error(f"Pipeline error: {e}")
-            st.caption("If this is an auth error, set GOOGLE_API_KEY (and TAVILY_API_KEY) "
-                       "in Streamlit secrets or your local .env.")
+                results = {}
+                with st.spinner("Observer → Curate → Format → Deliver → Evaluate..."):
+                    for skill in chosen_skills:
+                        results[skill] = pipeline.invoke({
+                            "footprint": json.dumps(st.session_state["footprint"]),
+                            "chosen_skill": skill,
+                            "delivery_format": st.session_state["delivery_format"],
+                            "loop_step": 0,
+                            "messages": [],
+                        })
+                st.session_state["pipeline_results"] = results
+                st.rerun()
+            except Exception as e:
+                st.error(f"Pipeline error: {e}")
+                st.caption("If this is an auth error, set GOOGLE_API_KEY (and TAVILY_API_KEY) "
+                           "in Streamlit secrets or your local .env.")
 
-# ============ STEP 4: SHOW THE NUDGE (its own page) ============
-if "pipeline_result" in st.session_state and not st.session_state.get("show_reassessment"):
+# ============ STEP 4: SHOW THE NUDGES (its own page, one block per skill) ============
+if "pipeline_results" in st.session_state and not st.session_state.get("show_reassessment"):
     st.header("3 · Run the ABL pipeline")
-    nudge = st.session_state["pipeline_result"]["final_nudge"]
-    st.success(f"Detected gap: **{nudge['skill']}**")
 
-    st.subheader("📣 Learning Nudge")
-    st.caption(f"{len(nudge['items'])} source(s) gathered for this skill.")
-    for item in nudge["items"]:
-        with st.container(border=True):
-            st.markdown(f"**{item.get('title') or item['source']}**  \n"
-                        f"Source: {item['source']} · Format: {item['format']}")
-            if item.get("url"):
-                st.markdown(f"[Open link]({item['url']})")
-            st.write(item["content"])
-
-    with st.expander("Raw nudge payload (JSON)"):
-        st.json(nudge)
+    for skill, result in st.session_state["pipeline_results"].items():
+        nudge = result["final_nudge"]
+        st.subheader(f"📣 Learning Nudge — {skill}")
+        st.caption(f"{len(nudge['items'])} source(s) gathered for this skill.")
+        for item in nudge["items"]:
+            with st.container(border=True):
+                st.markdown(f"**{item.get('title') or item['source']}**  \n"
+                            f"Source: {item['source']} · Format: {item['format']}")
+                if item.get("url"):
+                    st.markdown(f"[Open link]({item['url']})")
+                st.write(item["content"])
+        with st.expander(f"Raw nudge payload (JSON) — {skill}"):
+            st.json(nudge)
 
     if st.button("Next → Re-assessment", type="primary"):
         st.session_state["show_reassessment"] = True
         st.rerun()
 
-# ============ STEP 5: THE EVALUATOR'S RE-ASSESSMENT (separate page) ============
+# ============ STEP 5: THE EVALUATOR'S RE-ASSESSMENT (separate page, retakeable) ============
 if st.session_state.get("show_reassessment"):
     st.header("4 · Re-assessment — after you've gone through the content")
-    reassessment = st.session_state["pipeline_result"].get("reassessment", {})
-    questions = reassessment.get("questions", [])
 
-    if st.button("← Back to nudge"):
+    if st.button("← Back to nudges"):
         st.session_state["show_reassessment"] = False
         st.rerun()
 
-    if not questions:
-        st.warning("The Evaluator didn't return a usable quiz — check GOOGLE_API_KEY / logs.")
-    elif "reassessment_result" not in st.session_state:
-        sources = ", ".join(reassessment.get("based_on", []))
-        st.write(f"Personalised follow-up for **{reassessment['skill']}**, drawing on: *{sources}*")
-        with st.form("reassessment_form"):
-            answers = []
-            for qi, q in enumerate(questions):
-                tag = " (Knowledge Check)" if q["type"] == "knowledge_check" else ""
-                idx = st.radio(q["text"] + tag, range(len(q["options"])),
-                                format_func=lambda i, q=q: q["options"][i],
-                                key=f"reassess_{qi}", index=None)
-                answers.append(idx)
-            done = st.form_submit_button("Submit re-assessment", type="primary")
+    reassessment_results = st.session_state.setdefault("reassessment_results", {})
 
-            if done:
-                if any(a is None for a in answers):
-                    st.error("Please answer every question.")
-                else:
-                    st.session_state["reassessment_result"] = score_questions(questions, answers)
-                    st.rerun()
-    else:
-        before = st.session_state["pipeline_result"]["detected_level"]
-        after = st.session_state["reassessment_result"]["final"]
-        required = reassessment.get("required_level")
-        delta = after - before
+    for skill, result in st.session_state["pipeline_results"].items():
+        st.markdown(f"### {skill}")
+        reassessment = result.get("reassessment", {})
+        questions = reassessment.get("questions", [])
 
-        c1, c2, c3 = st.columns(3)
-        c1.metric("Before", before)
-        c2.metric("After", after)
-        c3.metric("Progression", f"+{delta}" if delta >= 0 else str(delta))
+        if not questions:
+            st.warning(f"The Evaluator didn't return a usable quiz for {skill} — check GOOGLE_API_KEY / logs.")
+            continue
 
-        verdict, explanation = evaluate_outcome(before, after, required, st.session_state["reassessment_result"])
-        if verdict == "GOOD":
-            st.success(f"✅ GOOD — {explanation}")
-        elif verdict == "NEEDS WORK":
-            st.warning(f"🟡 NEEDS WORK — {explanation}")
+        if skill not in reassessment_results:
+            sources = ", ".join(reassessment.get("based_on", []))
+            st.write(f"Personalised follow-up, drawing on: *{sources}*")
+            with st.form(f"reassessment_form_{skill}"):
+                answers = []
+                for qi, q in enumerate(questions):
+                    tag = " (Knowledge Check)" if q["type"] == "knowledge_check" else ""
+                    idx = st.radio(q["text"] + tag, range(len(q["options"])),
+                                    format_func=lambda i, q=q: q["options"][i],
+                                    key=f"reassess_{skill}_{qi}", index=None)
+                    answers.append(idx)
+                done = st.form_submit_button(f"Submit re-assessment — {skill}", type="primary")
+
+                if done:
+                    if any(a is None for a in answers):
+                        st.error("Please answer every question.")
+                    else:
+                        reassessment_results[skill] = score_questions(questions, answers)
+                        st.rerun()
         else:
-            st.error(f"❌ BAD — {explanation}")
+            before = result["detected_level"]
+            after = reassessment_results[skill]["final"]
+            required = reassessment.get("required_level")
+            delta = after - before
+
+            c1, c2, c3 = st.columns(3)
+            c1.metric("Before", before)
+            c2.metric("After", after)
+            c3.metric("Progression", f"+{delta}" if delta >= 0 else str(delta))
+
+            verdict, explanation = evaluate_outcome(before, after, required, reassessment_results[skill])
+            if verdict == "GOOD":
+                st.success(f"✅ GOOD — {explanation}")
+            elif verdict == "NEEDS WORK":
+                st.warning(f"🟡 NEEDS WORK — {explanation}")
+            else:
+                st.error(f"❌ BAD — {explanation}")
+
+            if verdict != "GOOD" and st.button(f"🔁 Go through the content again & retake — {skill}"):
+                reassessment_results.pop(skill, None)
+                st.session_state["show_reassessment"] = False
+                st.rerun()
+            elif verdict == "GOOD" and st.button(f"🔁 Retake anyway — {skill}"):
+                reassessment_results.pop(skill, None)
+                st.rerun()
+
+        st.divider()
