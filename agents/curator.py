@@ -61,14 +61,18 @@ REPSOL_COURSES = {
 
 def curator_node(state):
     detected_skill = state.get("detected_skill")
+    detected_level = state.get("detected_level")
     upstream = [
         c for c in state.get("filtered_content", [])
         if not c.get("text", "").startswith("[stub]")
     ]
-    internal = _repsol_courses(detected_skill) + upstream
 
+    internal = _best_repsol_course(detected_skill, detected_level)
     query = state.get("skill_gap") or detected_skill or ""
-    assembled = internal + _search_external(query)
+
+    # 2-3 documents total: the one best Repsol course (if any) plus a
+    # YouTube video and a Coursera course found via targeted web search.
+    assembled = ([internal] if internal else []) + upstream + _search_external(query)
 
     if not assembled:
         return {
@@ -79,11 +83,16 @@ def curator_node(state):
     return {"filtered_content": assembled}
 
 
-def _repsol_courses(skill):
-    return [
-        {**course, "source": "internal", "platform": "repsol"}
-        for course in REPSOL_COURSES.get(skill, [])
-    ]
+def _best_repsol_course(skill, level):
+    courses = REPSOL_COURSES.get(skill, [])
+    if not courses:
+        return None
+    # Prefer the course matching their current level; otherwise the next
+    # one up; otherwise the lowest-level course available.
+    match = next((c for c in courses if c["level"] == level), None) \
+        or next((c for c in sorted(courses, key=lambda c: c["level"]) if c["level"] > (level or 0)), None) \
+        or min(courses, key=lambda c: c["level"])
+    return {**match, "source": "internal", "platform": "repsol"}
 
 
 def _search_external(query):
@@ -91,17 +100,6 @@ def _search_external(query):
         from tavily import TavilyClient
 
         client = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])
-        results = client.search(query=query, max_results=EXTERNAL_RESULTS)
-        return [
-            {
-                "text": r.get("content", ""),
-                "source": "external",
-                "platform": _platform(r.get("url", "")),
-                "url": r.get("url"),
-                "title": r.get("title"),
-            }
-            for r in results.get("results", [])
-        ]
     except Exception:
         # No Tavily key / package / network — stub so the pipeline still runs.
         return [{
@@ -109,6 +107,39 @@ def _search_external(query):
             "source": "external",
             "platform": "web",
         }]
+
+    found = []
+    for domain, platform in [("youtube.com", "youtube"), ("coursera.org", "coursera")]:
+        try:
+            results = client.search(query=query, max_results=1, include_domains=[domain])
+            for r in results.get("results", [])[:1]:
+                found.append({
+                    "text": r.get("content", ""),
+                    "source": "external",
+                    "platform": platform,
+                    "url": r.get("url"),
+                    "title": r.get("title"),
+                })
+        except Exception:
+            continue
+
+    if not found:
+        # Neither targeted search turned up anything — fall back to a
+        # generic web search so there's still external content.
+        try:
+            results = client.search(query=query, max_results=EXTERNAL_RESULTS)
+            for r in results.get("results", [])[:2]:
+                found.append({
+                    "text": r.get("content", ""),
+                    "source": "external",
+                    "platform": _platform(r.get("url", "")),
+                    "url": r.get("url"),
+                    "title": r.get("title"),
+                })
+        except Exception:
+            pass
+
+    return found
 
 
 def _platform(url):

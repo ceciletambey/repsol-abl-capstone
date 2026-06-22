@@ -88,7 +88,7 @@ else:
                 note = f"below role requirement"
             st.metric(label, v["level"], note)
     if st.button("Retake assessment"):
-        for key in ["footprint", "delivery_format", "pipeline_result"]:
+        for key in ["footprint", "delivery_format", "pipeline_result", "show_reassessment", "reassessment_result"]:
             st.session_state.pop(key, None)
         st.rerun()
 
@@ -133,33 +133,44 @@ if "footprint" in st.session_state and "pipeline_result" not in st.session_state
             st.caption("If this is an auth error, set GOOGLE_API_KEY (and TAVILY_API_KEY) "
                        "in Streamlit secrets or your local .env.")
 
-# ============ STEP 4: SHOW THE NUDGE ============
-if "pipeline_result" in st.session_state:
+# ============ STEP 4: SHOW THE NUDGE (its own page) ============
+if "pipeline_result" in st.session_state and not st.session_state.get("show_reassessment"):
     st.header("3 · Run the ABL pipeline")
     nudge = st.session_state["pipeline_result"]["final_nudge"]
     st.success(f"Detected gap: **{nudge['skill']}**")
 
     st.subheader("📣 Learning Nudge")
-    st.markdown(f"**Skill:** {nudge['skill']}  \n"
-                f"**Source:** {nudge['source']}  \n"
-                f"**Format:** {nudge['format']}")
-    if nudge.get("url"):
-        st.markdown(f"[Open link]({nudge['url']})")
-    st.info(nudge["content"])
+    st.caption(f"{len(nudge['items'])} source(s) gathered for this skill.")
+    for item in nudge["items"]:
+        with st.container(border=True):
+            st.markdown(f"**{item.get('title') or item['source']}**  \n"
+                        f"Source: {item['source']} · Format: {item['format']}")
+            if item.get("url"):
+                st.markdown(f"[Open link]({item['url']})")
+            st.write(item["content"])
 
     with st.expander("Raw nudge payload (JSON)"):
         st.json(nudge)
 
-    # ============ STEP 5: THE EVALUATOR'S RE-ASSESSMENT ============
+    if st.button("Next → Re-assessment", type="primary"):
+        st.session_state["show_reassessment"] = True
+        st.rerun()
+
+# ============ STEP 5: THE EVALUATOR'S RE-ASSESSMENT (separate page) ============
+if st.session_state.get("show_reassessment"):
     st.header("4 · Re-assessment — after you've gone through the content")
     reassessment = st.session_state["pipeline_result"].get("reassessment", {})
     questions = reassessment.get("questions", [])
 
+    if st.button("← Back to nudge"):
+        st.session_state["show_reassessment"] = False
+        st.rerun()
+
     if not questions:
         st.warning("The Evaluator didn't return a usable quiz — check GOOGLE_API_KEY / logs.")
     elif "reassessment_result" not in st.session_state:
-        st.write(f"Personalised follow-up for **{reassessment['skill']}**, based on: "
-                 f"*{reassessment['based_on']}*")
+        sources = ", ".join(reassessment.get("based_on", []))
+        st.write(f"Personalised follow-up for **{reassessment['skill']}**, drawing on: *{sources}*")
         with st.form("reassessment_form"):
             answers = []
             for qi, q in enumerate(questions):

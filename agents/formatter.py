@@ -1,17 +1,14 @@
 """
 Agent 04b — The Formatter.
 
-Sits between the Curator (gathers several candidates — Repsol courses,
-web articles, videos, whatever else turns up) and Delivery (packages the
-final payload). Rather than hardcoding "always take item 0" or "if it's
-YouTube do X", it asks the LLM to look at the actual candidates and the
-skill gap, reason about which one is genuinely most useful right now and
-how it should be presented (read / watch / take a course), then shapes
-that one item accordingly.
+Sits between the Curator (gathers 2-3 candidates — a Repsol course, a
+YouTube video, a Coursera course, whatever turns up) and Delivery
+(packages the final payload). Shapes EVERY candidate for its own content
+type — a Repsol course becomes a "take this course" pointer, a YouTube
+result becomes a "watch this video" pointer, anything else gets a short
+text/audio summary — rather than narrowing down to a single "best" pick.
+The employee sees all of them.
 """
-
-import json
-import re
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 
@@ -31,43 +28,11 @@ def formatter_node(state):
         return {"filtered_content": []}
 
     delivery_format = state.get("delivery_format", "text")
-    decision = _pick_best(candidates, state.get("skill_gap", ""))
-    chosen = candidates[decision["index"]]
-
-    return {"filtered_content": [_shape(chosen, decision.get("presentation"), delivery_format)]}
-
-
-def _pick_best(candidates, skill_gap):
-    if len(candidates) == 1:
-        return {"index": 0, "presentation": None}
-
-    listing = "\n".join(
-        f"{i}. [{c.get('source')}/{c.get('platform', 'web')}] "
-        f"{c.get('title') or c.get('text', '')[:80]}"
-        for i, c in enumerate(candidates)
-    )
-    prompt = (
-        f"An employee has this skill gap: {skill_gap}\n\n"
-        f"Candidate learning resources:\n{listing}\n\n"
-        "Pick the single most useful one for closing this specific gap right "
-        "now. Prefer Repsol's own internal courses when they genuinely fit — "
-        "only pick an external resource if it covers the gap better.\n\n"
-        "Reply with ONLY a JSON object, no other text: "
-        '{"index": <int>, "presentation": "read"|"watch"|"course"}'
-    )
-    raw = get_llm().invoke(prompt).content
-    match = re.search(r"\{.*\}", raw, re.S)
-    try:
-        decision = json.loads(match.group(0)) if match else {}
-        decision["index"] = max(0, min(int(decision["index"]), len(candidates) - 1))
-        return decision
-    except (KeyError, ValueError, TypeError):
-        return {"index": 0, "presentation": None}
+    shaped = [_shape(dict(c), _infer_presentation(c), delivery_format) for c in candidates]
+    return {"filtered_content": shaped}
 
 
 def _shape(chosen, presentation, delivery_format):
-    presentation = presentation or _infer_presentation(chosen)
-
     if presentation == "course":
         title = chosen.get("title", "Repsol course")
         hours = chosen.get("duration_hours")
@@ -89,9 +54,10 @@ def _shape(chosen, presentation, delivery_format):
 
 
 def _infer_presentation(chosen):
-    if chosen.get("platform") == "repsol":
+    platform = chosen.get("platform")
+    if platform in ("repsol", "coursera"):
         return "course"
-    if chosen.get("url"):
+    if platform == "youtube":
         return "watch"
     return "read"
 

@@ -1,13 +1,15 @@
 """
 Agent 06 — The Evaluator.
 
-Generates the second assessment: a short follow-up quiz for the ONE skill
-the employee worked on, calibrated to their starting level and grounded in
-the exact content the Formatter/Delivery just gave them. Not a generic
-quiz — it's smart in the sense that it depends entirely on three things
-per employee: which skill, what level they started at, and what they were
-actually taught. This is the baseline the original assessment promised
-growth would be measured against.
+Generates the second assessment: a longer follow-up quiz for the ONE
+skill the employee worked on, calibrated to their starting level and
+grounded in EVERY piece of content the Curator/Formatter gathered (the
+Repsol course, the YouTube video, the Coursera course — not just one of
+them). Smart in the sense that it depends entirely on three things per
+employee: which skill, what level they started at (and what their role
+actually requires), and what they were actually given to learn from. This
+is the baseline the original assessment promised growth would be measured
+against.
 """
 
 import json
@@ -16,6 +18,7 @@ import re
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 _llm = None
+NUM_QUESTIONS = 4
 
 
 def get_llm():
@@ -30,9 +33,9 @@ def evaluator_node(state):
     level = state.get("detected_level")
     required_level = state.get("required_level")
     is_knowledge_gap = state.get("is_knowledge_gap", False)
-    nudge = state.get("final_nudge", {})
-    content = nudge.get("content", "")
+    items = state.get("final_nudge", {}).get("items", [])
 
+    content = _combine_sources(items)
     questions = _generate_quiz(skill, level, required_level, is_knowledge_gap, content)
 
     return {
@@ -40,10 +43,17 @@ def evaluator_node(state):
             "skill": skill,
             "baseline_level": level,
             "required_level": required_level,
-            "based_on": nudge.get("title") or content[:80],
+            "based_on": [i.get("title") or i.get("content", "")[:60] for i in items],
             "questions": questions,
         }
     }
+
+
+def _combine_sources(items):
+    return "\n\n---\n\n".join(
+        f"[Source: {i.get('title') or i.get('source', 'unknown')}]\n{i.get('content', '')}"
+        for i in items if i.get("content")
+    )
 
 
 def _generate_quiz(skill, level, required_level, is_knowledge_gap, content):
@@ -70,24 +80,27 @@ def _generate_quiz(skill, level, required_level, is_knowledge_gap, content):
 
     prompt = (
         f"An employee has a skill gap in '{skill}'. {goal}\n\n"
-        f"They were just given this exact learning content:\n\n{content}\n\n"
-        "Write a follow-up assessment of exactly 2 questions that can ONLY be "
-        "answered well by someone who actually engaged with THIS content — not "
-        "generic trivia about the topic.\n\n"
-        "1. A 'self_report' question about applying this specific skill now, "
-        "with 4 options in random order (not sorted by competency) and a "
-        "'scores' array mapping each option, in order, to a distinct level "
+        f"They were just given ALL of the following learning sources — a "
+        f"thorough follow-up should draw on each of them, not just one:\n\n{content}\n\n"
+        f"Write a follow-up assessment of exactly {NUM_QUESTIONS} questions "
+        "that can ONLY be answered well by someone who actually engaged with "
+        "THIS material — not generic trivia about the topic. Spread the "
+        "questions across the different sources above where possible.\n\n"
+        "2 questions must be type 'self_report': about applying this specific "
+        "skill now, 4 options in random order (not sorted by competency), and "
+        "a 'scores' array mapping each option, in order, to a distinct level "
         "1-4.\n"
-        "2. A 'knowledge_check' question with one objectively correct answer "
-        "drawn directly from the content above, 4 options, the 0-based "
-        "correct index, and a short explanation.\n\n"
-        "Reply with ONLY a JSON array of exactly 2 question objects, no other "
-        "text, in this exact shape:\n"
+        f"{NUM_QUESTIONS - 2} questions must be type 'knowledge_check': one "
+        "objectively correct answer drawn directly from the sources above, 4 "
+        "options, the 0-based correct index, and a short explanation that "
+        "cites which source it came from.\n\n"
+        f"Reply with ONLY a JSON array of exactly {NUM_QUESTIONS} question "
+        "objects, no other text, in this exact shape:\n"
         '[{"type": "self_report", "text": "...", '
         '"options": ["...", "...", "...", "..."], "scores": [1, 2, 3, 4]}, '
         '{"type": "knowledge_check", "text": "...", '
         '"options": ["...", "...", "...", "..."], "correct": 0, '
-        '"explanation": "..."}]'
+        '"explanation": "..."}, ...]'
     )
 
     raw = get_llm().invoke(prompt).content
