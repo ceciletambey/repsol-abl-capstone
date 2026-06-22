@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Repsol — Digital Skills Baseline Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --red: #C8102E;
+    --red-dark: #9E0B22;
+    --red-light: #FDEAED;
+    --navy: #1F4E79;
+    --navy-light: #EBF2FA;
+    --dark: #1A1A1A;
+    --mid: #555;
+    --muted: #888;
+    --border: #E5E5E5;
+    --bg: #FAFAFA;
+    --white: #FFFFFF;
+    --orange: #E07000;
+    --orange-light: #FFF4E5;
+    --green: #1A7A3C;
+    --green-light: #E8F5EE;
+    --blue: #185FA5;
+    --blue-light: #E6F1FB;
+    --amber: #BA7517;
+    --amber-light: #FAEEDA;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── TOP NAV ── */
+  .topnav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem;
+    height: 56px;
+  }
+  .logo {
+    background: var(--red);
+    color: #fff;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
+    padding: 6px 14px;
+    border-radius: 4px;
+    user-select: none;
+  }
+  .nav-meta {
+    font-size: 0.78rem;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; animation: fadeIn 0.35s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── LANDING ── */
+  .landing-hero {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 3.5rem 2rem 2.5rem;
+    text-align: center;
+  }
+  .landing-hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    color: var(--dark);
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+  .landing-hero h1 span { color: var(--red); }
+  .landing-hero .subtitle {
+    font-size: 0.9rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+  }
+  .landing-hero p {
+    max-width: 620px;
+    margin: 0 auto;
+    color: var(--mid);
+    font-size: 0.97rem;
+  }
+
+  .landing-body { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 2rem; }
+  @media (max-width: 640px) { .info-grid { grid-template-columns: 1fr; } }
+
+  .info-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.4rem 1.5rem;
+  }
+  .info-card.full { grid-column: 1 / -1; }
+  .info-card h3 {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 0.9rem;
+  }
+  .info-card ul { list-style: none; }
+  .info-card ul li {
+    font-size: 0.9rem;
+    color: var(--mid);
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--bg);
+    display: flex; gap: 0.6rem;
+  }
+  .info-card ul li::before { content: "—"; color: var(--red); flex-shrink: 0; }
+
+  .pill-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+  .pill {
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: var(--navy-light);
+    color: var(--navy);
+    border: 1px solid #c5d9f0;
+  }
+
+  /* scoring table */
+  .score-section { margin-bottom: 2rem; }
+  .score-section h3 {
+    font-size: 0.75rem; font-weight: 600;
+    letter-spacing: 0.09em; text-transform: uppercase;
+    color: var(--red); margin-bottom: 1rem;
+  }
+  .level-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  .level-table th {
+    text-align: left; padding: 8px 12px;
+    background: var(--navy); color: #fff;
+    font-weight: 500; font-size: 0.8rem;
+  }
+  .level-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .level-table tr:last-child td { border-bottom: none; }
+  .level-table tr:nth-child(even) td { background: #f7f7f7; }
+  .lvl-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 50%;
+    font-weight: 600; font-size: 0.85rem; color: #fff;
+  }
+  .lvl-1 { background: var(--red); }
+  .lvl-2 { background: var(--orange); }
+  .lvl-3 { background: var(--blue); }
+  .lvl-4 { background: var(--green); }
+
+  .rule-box {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--navy);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin-top: 1rem;
+    font-size: 0.88rem;
+    color: var(--mid);
+  }
+  .rule-box strong { color: var(--dark); }
+
+  .flag-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
+  .flag-chip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.83rem;
+    font-weight: 500;
+  }
+  .flag-chip.red { background: var(--red-light); color: var(--red-dark); border: 1px solid #f5c5cc; }
+  .flag-chip.orange { background: var(--orange-light); color: #8B4500; border: 1px solid #ffd9a8; }
+  .flag-chip .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .flag-chip.red .dot { background: var(--red); }
+  .flag-chip.orange .dot { background: var(--orange); }
+
+  .start-btn {
+    display: block; margin: 2.5rem auto 0;
+    background: var(--red); color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 600;
+    padding: 14px 48px;
+    border: none; border-radius: 8px;
+    cursor: pointer; letter-spacing: 0.02em;
+    transition: background 0.18s, transform 0.12s;
+  }
+  .start-btn:hover { background: var(--red-dark); transform: translateY(-1px); }
+  .start-btn:active { transform: scale(0.98); }
+
+  /* ── ASSESSMENT ── */
+  .assess-wrap { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  .progress-bar-wrap { margin-bottom: 2rem; }
+  .progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 0.8rem; color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .progress-track {
+    height: 5px; background: var(--border);
+    border-radius: 10px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: var(--red);
+    border-radius: 10px;
+    transition: width 0.4s ease;
+  }
+
+  .cat-header {
+    background: var(--navy);
+    border-radius: 10px 10px 0 0;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 0;
+  }
+  .cat-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem; color: #fff;
+    margin-bottom: 0.25rem;
+  }
+  .cat-header p { font-size: 0.83rem; color: rgba(255,255,255,0.7); font-style: italic; }
+
+  .questions-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .question-block { margin-bottom: 1.8rem; }
+  .question-block:last-child { margin-bottom: 0; }
+
+  .q-label {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 0.75rem;
+  }
+  .q-num {
+    font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .kc-tag {
+    font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--red);
+    background: var(--red-light);
+    padding: 3px 8px; border-radius: 4px;
+    border: 1px solid #f5c5cc;
+  }
+  .q-text {
+    font-size: 0.97rem; font-weight: 500;
+    color: var(--dark); line-height: 1.5;
+    margin-bottom: 0.9rem;
+  }
+
+  .options-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .opt-label {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    font-size: 0.9rem; color: var(--mid);
+  }
+  .opt-label:hover { border-color: #bbb; background: var(--bg); }
+  .opt-label input[type=radio] { display: none; }
+  .opt-label.selected {
+    border-color: var(--navy);
+    background: var(--navy-light);
+    color: var(--dark);
+  }
+
+  .score-badge {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700;
+    color: #fff; margin-top: 1px;
+  }
+  .opt-letter {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.78rem; font-weight: 700;
+    background: var(--border); color: var(--mid);
+    margin-top: 1px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .opt-label.selected .opt-letter {
+    background: var(--navy); color: #fff;
+  }
+
+  .divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+
+  .next-btn {
+    display: block; width: 100%;
+    background: var(--red); color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem; font-weight: 600;
+    padding: 13px 24px;
+    border: none; border-radius: 8px;
+    cursor: pointer; letter-spacing: 0.02em;
+    transition: background 0.18s, opacity 0.18s;
+  }
+  .next-btn:disabled {
+    opacity: 0.38; cursor: not-allowed;
+    background: var(--red);
+  }
+  .next-btn:not(:disabled):hover { background: var(--red-dark); }
+
+  /* ── RESULTS ── */
+  .results-wrap { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+  .results-hero {
+    text-align: center; margin-bottom: 2.5rem;
+  }
+  .results-hero h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem; color: var(--dark);
+    margin-bottom: 0.4rem;
+  }
+  .results-hero p { font-size: 0.9rem; color: var(--muted); }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .result-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    position: relative;
+  }
+  .result-card-top {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+  .result-cat-name {
+    font-size: 0.82rem; font-weight: 600;
+    color: var(--mid);
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .score-circle {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: #fff; flex-shrink: 0;
+  }
+  .score-circle .sc-num {
+    font-size: 1.2rem; font-weight: 700; line-height: 1;
+  }
+  .score-circle .sc-label {
+    font-size: 0.52rem; font-weight: 500;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    opacity: 0.85; line-height: 1;
+  }
+  .level-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem; color: var(--dark);
+    margin-bottom: 0.6rem;
+  }
+  .result-bar-track {
+    height: 4px; background: var(--border);
+    border-radius: 10px; overflow: hidden;
+    margin-bottom: 0.75rem;
+  }
+  .result-bar-fill { height: 100%; border-radius: 10px; }
+
+  .result-flags { display: flex; flex-direction: column; gap: 4px; }
+  .r-flag {
+    font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 3px 8px; border-radius: 4px;
+    display: inline-block; width: fit-content;
+  }
+  .r-flag.nudge { background: var(--red-light); color: var(--red-dark); border: 1px solid #f5c5cc; }
+  .r-flag.gap { background: var(--orange-light); color: #8B4500; border: 1px solid #ffd9a8; }
+
+  /* next steps */
+  .next-steps-box {
+    background: var(--navy);
+    border-radius: 10px;
+    padding: 1.5rem 1.75rem;
+    color: #fff;
+    margin-bottom: 1.5rem;
+  }
+  .next-steps-box h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.2rem; margin-bottom: 0.75rem;
+  }
+  .next-steps-box p { font-size: 0.9rem; color: rgba(255,255,255,0.8); line-height: 1.7; }
+  .next-steps-box p + p { margin-top: 0.5rem; }
+  .agent-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+  .a-pill {
+    font-size: 0.75rem; font-weight: 500;
+    padding: 4px 12px; border-radius: 20px;
+    background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.9);
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .sim-note {
+    font-size: 0.82rem; color: var(--muted);
+    text-align: center; font-style: italic;
+    margin-bottom: 1.5rem;
+    padding: 10px 16px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  /* ── PERSONAL DEV STEP ── */
+  .pd-header {
+    background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%);
+    border-radius: 10px 10px 0 0;
+    padding: 1.2rem 1.5rem;
+  }
+  .pd-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem; color: #fff; margin-bottom: 0.25rem;
+  }
+  .pd-header p { font-size: 0.83rem; color: rgba(255,255,255,0.7); font-style: italic; }
+  .pd-optional-tag {
+    display: inline-block;
+    font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    background: rgba(255,255,255,0.2); color: rgba(255,255,255,0.9);
+    padding: 3px 10px; border-radius: 4px; margin-top: 0.5rem;
+  }
+  .pd-card {
+    background: var(--white);
+    border: 1px solid var(--border); border-top: none;
+    border-radius: 0 0 10px 10px;
+    padding: 1.75rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .pd-intro {
+    font-size: 0.92rem; color: var(--mid); line-height: 1.7;
+    margin-bottom: 1.5rem;
+    padding: 1rem 1.25rem;
+    background: #f0faf4;
+    border-left: 4px solid #2d6a4f;
+    border-radius: 0 6px 6px 0;
+  }
+  .pd-field { margin-bottom: 1.5rem; }
+  .pd-field:last-child { margin-bottom: 0; }
+  .pd-field label {
+    display: block;
+    font-size: 0.88rem; font-weight: 600; color: var(--dark);
+    margin-bottom: 0.5rem;
+  }
+  .pd-field label span {
+    font-weight: 400; color: var(--muted); font-size: 0.8rem; margin-left: 6px;
+  }
+  .check-indicator {
+    flex-shrink: 0;
+    width: 22px; height: 22px;
+    border-radius: 4px;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 700;
+    color: transparent;
+    margin-top: 1px;
+    transition: all 0.15s;
+    background: var(--white);
+  }
+  .opt-label.pd-opt.selected .check-indicator {
+    background: #2d6a4f; border-color: #2d6a4f; color: #fff;
+  }
+  .opt-label.pd-opt.selected {
+    border-color: #2d6a4f; background: #f0faf4; color: var(--dark);
+  }
+  .opt-label.pd-opt.selected .opt-letter { background: #2d6a4f; color: #fff; }
+  .pd-skip-note {
+    font-size: 0.8rem; color: var(--muted); text-align: center;
+    margin-top: 0.75rem; font-style: italic;
+  }
+
+  /* results pd section */
+  .pd-results-box {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 4px solid #2d6a4f;
+    border-radius: 6px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .pd-results-box h3 {
+    font-size: 0.75rem; font-weight: 600;
+    letter-spacing: 0.09em; text-transform: uppercase;
+    color: #2d6a4f; margin-bottom: 1rem;
+  }
+  .pd-answer-block { margin-bottom: 0.9rem; }
+  .pd-answer-block:last-child { margin-bottom: 0; }
+  .pd-answer-q {
+    font-size: 0.8rem; font-weight: 600; color: var(--mid);
+    margin-bottom: 0.3rem;
+  }
+  .pd-answer-text {
+    font-size: 0.9rem; color: var(--dark);
+    padding: 8px 12px;
+    background: var(--bg); border-radius: 6px;
+    border: 1px solid var(--border);
+    font-style: italic;
+  }
+  .pd-skipped { color: var(--muted); font-style: italic; font-size: 0.88rem; }
+
+  .retake-btn {
+    display: block; margin: 0 auto;
+    background: transparent; color: var(--red);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; font-weight: 600;
+    padding: 11px 32px;
+    border: 2px solid var(--red); border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .retake-btn:hover { background: var(--red); color: #fff; }
+
+  /* ── ACCORDION ── */
+  .accordion { margin-top: 1.5rem; }
+  .acc-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.25rem;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    font-weight: 600; font-size: 0.95rem;
+    transition: background 0.15s;
+  }
+  .acc-header:hover { background: var(--bg); }
+  .acc-arrow { transition: transform 0.25s; font-size: 1rem; color: var(--muted); }
+  .acc-header.open .acc-arrow { transform: rotate(180deg); }
+  .acc-body {
+    display: none;
+    border: 1px solid var(--border); border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 1.25rem;
+    background: var(--white);
+  }
+  .acc-body.open { display: block; }
+
+  .kc-review-item { margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+  .kc-review-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .kc-review-cat {
+    font-size: 0.7rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--red); margin-bottom: 0.3rem;
+  }
+  .kc-review-q { font-size: 0.92rem; font-weight: 500; color: var(--dark); margin-bottom: 0.75rem; }
+  .kc-opts { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.75rem; }
+  .kc-opt {
+    padding: 8px 12px; border-radius: 6px;
+    font-size: 0.87rem; display: flex; gap: 8px;
+    border: 1px solid var(--border);
+  }
+  .kc-opt.correct { background: var(--green-light); border-color: #a3d9b5; color: #0f5028; }
+  .kc-opt.wrong-pick { background: var(--red-light); border-color: #f5c5cc; color: #7a0a1a; }
+  .kc-opt-letter { font-weight: 700; flex-shrink: 0; }
+  .kc-explain {
+    font-size: 0.85rem; font-style: italic;
+    color: var(--mid);
+    padding: 10px 14px;
+    background: var(--navy-light);
+    border-left: 3px solid var(--navy);
+    border-radius: 0 6px 6px 0;
+  }
+  .kc-explain strong { color: var(--navy); }
+  .result-icon { font-size: 0.85rem; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="topnav">
+  <div class="logo">REPSOL</div>
+  <span class="nav-meta">Agentic Based Learning System</span>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════════ SCREEN 1: LANDING -->
+<div id="screen-landing" class="screen active">
+  <div class="landing-hero">
+    <p class="subtitle">First Login · Baseline Assessment</p>
+    <h1>Digital Skills<br><span>Baseline Assessment</span></h1>
+    <p>Before your personalised learning journey begins, we need to understand your current digital skill levels. This assessment takes around 12 minutes and runs once — your results are used immediately to tailor every learning nudge you receive.</p>
+  </div>
+
+  <div class="landing-body">
+
+    <div class="info-grid">
+      <!-- About -->
+      <div class="info-card">
+        <h3>About this assessment</h3>
+        <ul>
+          <li>21 scored questions across 7 skill categories</li>
+          <li>Plus 5 optional personal development questions at the end</li>
+          <li>Each category has 2 self-report questions and 1 knowledge check</li>
+          <li>Approximately 15 minutes to complete (core: ~12 min + optional PD: ~3 min)</li>
+          <li>Runs once on first login — never repeated</li>
+          <li>Answer options are not in any obvious order — read each one carefully</li>
+          <li>Your results are passed directly to the Observer agent</li>
+        </ul>
+        <div class="pill-row">
+          <span class="pill">DigComp</span>
+          <span class="pill">Data Literacy</span>
+          <span class="pill">Generative AI</span>
+          <span class="pill">Automation</span>
+          <span class="pill">Power BI</span>
+          <span class="pill">M365</span>
+          <span class="pill">Cybersecurity</span>
+        </div>
+      </div>
+
+      <!-- How it was created -->
+      <div class="info-card">
+        <h3>How it was created</h3>
+        <ul>
+          <li>Based on Repsol's Target Skills Matrix and the EU DigComp 2.2 framework</li>
+          <li>Categories aligned to Repsol's internal course curriculum (Data & AI, Power BI, Copilot/M365, and more)</li>
+          <li>Hybrid format prevents self-report inflation — knowledge checks verify applied understanding</li>
+          <li>Output feeds into the Observer agent to personalise your learning nudges from day one</li>
+          <li>Designed as the Evaluator agent's baseline — growth is measured against this starting point</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Scoring system -->
+    <div class="info-card full score-section" style="margin-bottom:1.25rem;">
+      <h3>Scoring system</h3>
+
+      <table class="level-table" style="margin-bottom:1.25rem;">
+        <thead>
+          <tr>
+            <th style="width:60px">Level</th>
+            <th>Label</th>
+            <th>What it means</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="lvl-badge lvl-1">1</span></td>
+            <td><strong>Awareness</strong></td>
+            <td>I know the concept exists but have not applied it in practice</td>
+          </tr>
+          <tr>
+            <td><span class="lvl-badge lvl-2">2</span></td>
+            <td><strong>Basic</strong></td>
+            <td>I have used it for simple tasks, sometimes with guidance</td>
+          </tr>
+          <tr>
+            <td><span class="lvl-badge lvl-3">3</span></td>
+            <td><strong>Intermediate</strong></td>
+            <td>I use it confidently and independently in my day-to-day work</td>
+          </tr>
+          <tr>
+            <td><span class="lvl-badge lvl-4">4</span></td>
+            <td><strong>Expert</strong></td>
+            <td>I can teach others and handle complex, advanced scenarios</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="rule-box" style="margin-bottom:0.75rem;">
+        <strong>Self-Report questions</strong> — Each option carries a hidden score from 1 to 4 based on the level of skill or experience it describes. Answer options are deliberately not presented in order of proficiency — the system scores your answer based on what it describes, not its position in the list.<br><br>
+        <strong>Knowledge Check questions</strong> — One objectively correct answer exists. <strong>Correct = 3 points. Wrong = 1 point.</strong> This is intentional: getting it right confirms at least intermediate applied knowledge; getting it wrong flags a gap even if you self-reported high confidence.<br><br>
+        <strong>Category score</strong> — Average of all 3 question scores in the category, <strong>rounded down</strong> to the nearest integer (floor). Range: 1–4.
+      </div>
+
+      <div class="rule-box" style="border-left-color: var(--red);">
+        <strong>Overconfidence cap</strong> — If you answer the knowledge check incorrectly <em>and</em> your self-report average is 3 or above, your category score is capped at 2. This prevents the system placing you at Intermediate or Expert level based solely on self-assessment when your applied knowledge does not match. The Skill Matcher agent receives this as a <strong>knowledge_gap</strong> flag and prioritises a foundational nudge for that category before any other content.
+      </div>
+
+      <p style="font-size:0.82rem; color:var(--muted); margin-top:1rem; margin-bottom:0.6rem; font-weight:600; text-transform:uppercase; letter-spacing:0.06em;">Output flags</p>
+      <div class="flag-row">
+        <div class="flag-chip red"><span class="dot"></span>immediate_nudge — Final category score = 1</div>
+        <div class="flag-chip orange"><span class="dot"></span>knowledge_gap — KC wrong + self-report avg ≥ 3</div>
+      </div>
+    </div>
+
+    <!-- Role selection — required before starting, drives the Target Skills Matrix -->
+    <div class="info-card full" style="margin-bottom:1.25rem;">
+      <h3>Your role</h3>
+      <p style="font-size:0.9rem; color:var(--mid); margin-bottom:0.9rem;">
+        Repsol's Target Skills Matrix sets a different required level per skill for each
+        role. Select yours so the Observer can measure your results against what your
+        job actually requires, not an absolute scale.
+      </p>
+      <select id="role-select" style="width:100%; padding:10px 12px; font-size:0.92rem; border:1.5px solid var(--border); border-radius:8px; background:var(--white); color:var(--dark);">
+        <option value="" selected disabled>Select your role…</option>
+        <option value="Training Team">Training Team</option>
+        <option value="Marketing Teams">Marketing Teams</option>
+        <option value="Financial Services Team">Financial Services Team</option>
+        <option value="Buyers">Buyers</option>
+        <option value="IT Professional">IT Professional</option>
+      </select>
+      <p id="role-error" style="display:none; color:var(--red); font-size:0.85rem; margin-top:0.6rem;">Please select your role before starting.</p>
+    </div>
+
+    <button class="start-btn" onclick="startAssessment()">Begin Assessment →</button>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ SCREEN 2: ASSESSMENT -->
+<div id="screen-assess" class="screen">
+  <div class="assess-wrap">
+    <div class="progress-bar-wrap">
+      <div class="progress-label">
+        <span id="prog-text">Category 1 of 7</span>
+        <span id="prog-cat-name">General Digital Competency</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="prog-fill" style="width:14.28%"></div>
+      </div>
+    </div>
+
+    <!-- Category questions (steps 1–7) -->
+    <div id="cat-step">
+      <div class="cat-header">
+        <h2 id="cat-title">—</h2>
+        <p id="cat-desc">—</p>
+      </div>
+      <div class="questions-card" id="questions-container"></div>
+    </div>
+
+    <!-- Personal development step (step 8) -->
+    <div id="pd-step" style="display:none;">
+      <div class="pd-header">
+        <h2>Personal Development Interests</h2>
+        <p>Beyond your current role requirements — your optional learning ambitions</p>
+        <span class="pd-optional-tag">Optional — you may skip any or all questions</span>
+      </div>
+      <div class="pd-card">
+        <div class="pd-intro">
+          The previous 7 categories measured the skills required for your role at Repsol. This section is different — it is entirely optional and gives you the freedom to tell the system what <em>you</em> want to learn, regardless of your current job profile. Use it if you are aiming for a promotion, considering a role change, or simply curious about areas beyond your current responsibilities.
+        </div>
+        <div id="pd-questions-container"></div>
+        <p class="pd-skip-note">All questions are optional. Click "Submit Assessment" to proceed at any time.</p>
+      </div>
+    </div>
+
+    <button class="next-btn" id="next-btn" disabled onclick="nextStep()">Next Category →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ SCREEN 3 & 4: RESULTS -->
+<div id="screen-results" class="screen">
+  <div class="results-wrap">
+    <div class="results-hero">
+      <h2>Your Skill Profile</h2>
+      <p>Assessment complete — here is your baseline across all 7 digital skill categories.</p>
+    </div>
+
+    <div class="results-grid" id="results-grid"></div>
+
+    <!-- What the Observer would pick, given role + results — overridable -->
+    <div class="pd-results-box" id="gap-result-box" style="border-left-color: var(--red); display:none;">
+      <h3 style="color:var(--red);">Observer — Skill Gap to Act On</h3>
+      <div id="gap-result-content"></div>
+      <div style="margin-top:1rem;">
+        <label style="display:block; font-size:0.85rem; font-weight:600; color:var(--dark); margin-bottom:0.4rem;">
+          Want to work on something else instead?
+        </label>
+        <select id="skill-override" style="width:100%; padding:9px 12px; font-size:0.9rem; border:1.5px solid var(--border); border-radius:8px; background:var(--white); color:var(--dark);"></select>
+      </div>
+    </div>
+
+    <!-- Personal development answers -->
+    <div class="pd-results-box" id="pd-results-box" style="display:none;">
+      <h3>Your Personal Development Interests</h3>
+      <div id="pd-results-content"></div>
+    </div>
+
+    <div class="sim-note">
+      Note: This is a simulation. In the live ABL system, these results are passed automatically to the Skill Matcher agent to personalise your learning nudges from day one.
+    </div>
+
+    <div class="next-steps-box">
+      <h3>What happens next?</h3>
+      <p>Your skill profile is passed to the <strong style="color:#fff">Observer agent</strong>, which reads your results alongside your digital context (calendar, tasks, activity) to identify skill gaps and prioritise which ones matter most right now.</p>
+      <p>The <strong style="color:#fff">Content Curator</strong> then retrieves the most relevant learning content — internal Repsol courses first, then external sources — matched to those gaps. The <strong style="color:#fff">Formatter</strong> delivers that content to you in the right format for your current context (a quick nudge, an audio clip, or a full course). Finally, the <strong style="color:#fff">Evaluator</strong> creates a personalised assessment based on what you have learned to measure your actual level. The process ends there — your growth is recorded and available in your profile.</p>
+      <div class="agent-pills">
+        <span class="a-pill">01 Observer ← your profile lands here</span>
+        <span class="a-pill">02 Content Curator</span>
+        <span class="a-pill">03 Formatter</span>
+        <span class="a-pill">04 Evaluator</span>
+      </div>
+    </div>
+
+    <!-- Accordion: KC Review -->
+    <div class="accordion">
+      <div class="acc-header" id="acc-toggle" onclick="toggleAccordion()">
+        <span>Review your knowledge check answers</span>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body" id="acc-body">
+        <div id="kc-review-content"></div>
+      </div>
+    </div>
+
+    <div style="margin-top:2rem; text-align:center;">
+      <button class="retake-btn" onclick="retake()">Retake Assessment</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ DATA & LOGIC -->
+<script>
+// Repsol's Target Skills Matrix (IE ABL Clarificacions brief) — required
+// level per role, keyed by category id. EXCEL and SAP have no matching
+// assessment category so they're omitted; power_bi has no matrix entry
+// either, so it's never role-gated and stays on the absolute 1-4 scale.
+const ROLES = {
+  "Training Team":           { data: 3, automation: 1, ia_gen: 2, digcomp: 4, m365: 3, cybersecurity: 1 },
+  "Marketing Teams":         { data: 3, automation: 1, ia_gen: 3, digcomp: 4, m365: 3, cybersecurity: 1 },
+  "Financial Services Team": { data: 3, automation: 2, ia_gen: 2, digcomp: 4, m365: 3, cybersecurity: 2 },
+  "Buyers":                  { data: 3, automation: 1, ia_gen: 2, digcomp: 4, m365: 3, cybersecurity: 2 },
+  "IT Professional":         { data: 3, automation: 4, ia_gen: 3, digcomp: 4, m365: 4, cybersecurity: 3 },
+};
+
+// Maps the PD "priority_skill" question's options, in order, to category ids.
+const PD_PRIORITY_TO_SKILL = ["ia_gen", "power_bi", "cybersecurity", "m365"];
+
+let selectedRole = null;
+
+const CATEGORIES = [
+  {
+    id: "digcomp",
+    label: "General Digital Competency",
+    shortLabel: "DigComp",
+    desc: "Foundational digital literacy aligned with the EU DigComp 2.2 framework — the baseline Repsol uses for all employees.",
+    questions: [
+      {
+        type: "self_report",
+        text: "When you receive a document or file at work, how do you decide whether the information in it is reliable?",
+        options: [
+          "I cross-reference it with other sources and check the date and author.",
+          "I usually trust it if it comes from a work email.",
+          "I apply a structured fact-checking process and can coach others on evaluating digital sources.",
+          "I check who sent it and whether it looks official."
+        ],
+        scores: [3, 1, 4, 2]
+      },
+      {
+        type: "self_report",
+        text: "A colleague asks you to collaborate on a document in real time using a cloud tool. What best describes your experience?",
+        options: [
+          "I have done it a few times with help.",
+          "I set up and govern shared workspaces and train others to use them.",
+          "I have heard of it but have not done it before.",
+          "I do it regularly and manage version history and permissions comfortably."
+        ],
+        scores: [2, 4, 1, 3]
+      },
+      {
+        type: "knowledge_check",
+        text: "What does the term 'digital footprint' mean in a professional context?",
+        options: [
+          "The storage space used by files on your work computer.",
+          "The trail of data you leave behind through your online activity — websites visited, emails sent, and information shared.",
+          "A type of malware that tracks your keyboard input.",
+          "The battery consumption of your device during a workday."
+        ],
+        correct: 1,
+        explanation: "A digital footprint includes all data traces left by your online actions. Understanding it is key to managing your digital identity and privacy at work."
+      }
+    ]
+  },
+  {
+    id: "data",
+    label: "Data Literacy",
+    shortLabel: "Data Literacy",
+    desc: "Ability to understand, interpret, and work with data — aligned with Repsol's Introduction to Data and AI curriculum.",
+    questions: [
+      {
+        type: "self_report",
+        text: "A manager shares a chart showing monthly sales trends. Which best describes how you interpret it?",
+        options: [
+          "I critique the chart design, suggest improvements, and derive actionable insights for decision-making.",
+          "I understand the trend and can describe what it shows.",
+          "I can read the basic numbers but struggle to draw conclusions.",
+          "I interpret the trend, spot anomalies, and link it to business context."
+        ],
+        scores: [4, 2, 1, 3]
+      },
+      {
+        type: "self_report",
+        text: "Which best describes your experience working with datasets or data tools?",
+        options: [
+          "I clean, transform, and combine data from multiple sources independently.",
+          "I work mainly with Excel spreadsheets with small amounts of data.",
+          "I build ETL pipelines, write complex queries (SQL, Python, etc.), and design data models.",
+          "I can filter, sort, and do basic calculations on structured datasets."
+        ],
+        scores: [3, 1, 4, 2]
+      },
+      {
+        type: "knowledge_check",
+        text: "Which of the following is the best example of data governance in practice?",
+        options: [
+          "Choosing a bar chart instead of a pie chart for a presentation.",
+          "Defining who can access, modify, and delete a dataset, and setting data quality standards.",
+          "Training a machine learning model on customer data.",
+          "Exporting a Power BI report to PDF and emailing it to your team."
+        ],
+        correct: 1,
+        explanation: "Data governance is about defining ownership, access rules, and quality standards for data — ensuring it is trustworthy and used responsibly across the organisation."
+      }
+    ]
+  },
+  {
+    id: "ia_gen",
+    label: "Generative AI & Copilot",
+    shortLabel: "Generative AI",
+    desc: "Practical ability to use generative AI tools, including Repsol's deployed Copilot Web, and awareness of responsible use.",
+    questions: [
+      {
+        type: "self_report",
+        text: "How would you describe your current use of generative AI tools (e.g., Copilot Web, ChatGPT) in your work?",
+        options: [
+          "I use them occasionally for simple tasks like drafting emails or summarising text.",
+          "I design prompt frameworks, integrate AI into workflows, and guide others on effective use.",
+          "I have not used them or have only tried them out of curiosity.",
+          "I use them regularly and adapt my prompts to get specific, high-quality outputs."
+        ],
+        scores: [2, 4, 1, 3]
+      },
+      {
+        type: "self_report",
+        text: "How aware are you of the risks of using generative AI at work (e.g., hallucinations, data confidentiality, bias)?",
+        options: [
+          "I apply a responsible AI framework, contribute to usage policies, and train colleagues on safe AI practices.",
+          "I am not aware of specific risks.",
+          "I actively verify AI outputs, avoid inputting confidential data, and consider bias in responses.",
+          "I know AI can make mistakes and I should not share sensitive data."
+        ],
+        scores: [4, 1, 3, 2]
+      },
+      {
+        type: "knowledge_check",
+        text: "Which of the following is the best practice when writing a prompt for Copilot or another generative AI tool?",
+        options: [
+          "Keep it as short and vague as possible so the AI has creative freedom.",
+          "Always write in English, even if your work language is different.",
+          "Provide clear context, specify the format and length you want, and state the tone or audience.",
+          "Include your personal login credentials so the AI can access your account data."
+        ],
+        correct: 2,
+        explanation: "Effective prompting means giving the AI enough context — role, task, format, tone, audience, and constraints — to produce a useful and accurate output. This is the basis of Repsol's 6 Ps prompting method."
+      }
+    ]
+  },
+  {
+    id: "automation",
+    label: "Automation",
+    shortLabel: "Automation",
+    desc: "Ability to automate repetitive tasks using digital tools — an extended skill in Repsol's digital competency framework.",
+    questions: [
+      {
+        type: "self_report",
+        text: "Think of a repetitive task you do regularly (e.g., sending recurring reports, copying data between systems). How do you handle it?",
+        options: [
+          "I use a tool like Power Automate to automate it end-to-end.",
+          "I design and deploy automated workflows across systems and mentor others on automation.",
+          "I do it manually every time.",
+          "I have tried basic features like Excel macros or scheduled emails."
+        ],
+        scores: [3, 4, 1, 2]
+      },
+      {
+        type: "self_report",
+        text: "How familiar are you with no-code or low-code automation platforms (e.g., Microsoft Power Automate)?",
+        options: [
+          "I design complex multi-step automations, connect APIs, and handle error management.",
+          "I know they exist and have seen a demo or tried a simple flow.",
+          "I have not heard of or used them.",
+          "I build and maintain automation flows independently."
+        ],
+        scores: [4, 2, 1, 3]
+      },
+      {
+        type: "knowledge_check",
+        text: "In Microsoft Power Automate, what is a 'trigger'?",
+        options: [
+          "A button you press to manually stop a running flow.",
+          "The event that starts an automated workflow (e.g., a new email arrives or a file is uploaded to SharePoint).",
+          "An error message displayed when a flow fails.",
+          "A summary report generated at the end of a completed workflow."
+        ],
+        correct: 1,
+        explanation: "A trigger is the starting event of an automated flow. Without a trigger, a flow does nothing. Common examples include receiving an email, a form being submitted, or a scheduled time."
+      }
+    ]
+  },
+  {
+    id: "power_bi",
+    label: "Data Visualisation (Power BI)",
+    shortLabel: "Power BI",
+    desc: "Ability to consume and create reports in Microsoft Power BI — tracked from Consumer level through to Expert in Repsol's curriculum.",
+    questions: [
+      {
+        type: "self_report",
+        text: "A Power BI dashboard has been shared with you. Which best describes what you can do with it?",
+        options: [
+          "I can use filters, explore tabs, and export data.",
+          "I can evaluate the report design and suggest structural or DAX formula improvements to the creator.",
+          "I navigate confidently, slice data by different dimensions, and subscribe to report alerts.",
+          "I can view it but do not know how to use filters or drill down into data."
+        ],
+        scores: [2, 4, 3, 1]
+      },
+      {
+        type: "self_report",
+        text: "Have you ever built a Power BI report (connecting to a data source, transforming data, creating visuals)?",
+        options: [
+          "I build reports independently, including data transformation and table relationships.",
+          "No, I have only ever viewed reports built by others.",
+          "I build complex models with advanced DAX, Row-Level Security, and publish to shared workspaces.",
+          "I have built a basic report following a tutorial or with guidance."
+        ],
+        scores: [3, 1, 4, 2]
+      },
+      {
+        type: "knowledge_check",
+        text: "What does DAX stand for, and what is it used for in Power BI?",
+        options: [
+          "Digital Analytics Exchange — a protocol for exporting Power BI reports.",
+          "Data Analysis Expressions — a formula language used to create calculated columns, measures, and custom aggregations in Power BI.",
+          "Dashboard and Excel — a feature for importing Excel files into Power BI.",
+          "Data Aggregation Extension — a plug-in that connects Power BI to external databases."
+        ],
+        correct: 1,
+        explanation: "DAX (Data Analysis Expressions) is Power BI's formula language. It is used to write measures and calculated columns that go beyond simple drag-and-drop aggregations."
+      }
+    ]
+  },
+  {
+    id: "m365",
+    label: "Microsoft 365 & Digital Workplace",
+    shortLabel: "M365",
+    desc: "Proficiency with the M365 suite (Teams, Outlook, SharePoint, OneDrive, Copilot) — core tools across all Repsol roles.",
+    questions: [
+      {
+        type: "self_report",
+        text: "Which best describes how you use Microsoft Teams in your day-to-day work?",
+        options: [
+          "I configure Teams environments, set governance policies, and integrate tools for my team.",
+          "I use channels, share files, and schedule meetings through Teams.",
+          "I mainly use it for video calls and basic chat.",
+          "I use Teams apps, tabs, and integrations (e.g., Planner, Forms) to manage work."
+        ],
+        scores: [4, 2, 1, 3]
+      },
+      {
+        type: "self_report",
+        text: "How do you typically manage and share documents with colleagues?",
+        options: [
+          "I save files to OneDrive or SharePoint and share a link.",
+          "I co-author documents in real time, manage permissions, and use version history.",
+          "I design SharePoint site structures, set document lifecycle policies, and train others.",
+          "I send files as email attachments."
+        ],
+        scores: [2, 3, 4, 1]
+      },
+      {
+        type: "knowledge_check",
+        text: "In Microsoft Teams, what is the main purpose of a 'Channel'?",
+        options: [
+          "A private one-to-one video call between two colleagues.",
+          "A company-wide announcement board only IT administrators can post to.",
+          "An organised space within a Team for focused conversations, file sharing, and collaboration on a specific topic or project.",
+          "A tool for scheduling meetings directly from Outlook."
+        ],
+        correct: 2,
+        explanation: "Channels keep Teams organised. Each channel focuses on a specific topic (e.g., 'Marketing Campaigns'), keeping conversations and files relevant and easy to find."
+      }
+    ]
+  },
+  {
+    id: "cybersecurity",
+    label: "Cybersecurity Awareness",
+    shortLabel: "Cybersecurity",
+    desc: "Ability to identify and respond to digital security threats — mapped to the CIBER skill in Repsol's Target Skills Matrix.",
+    questions: [
+      {
+        type: "self_report",
+        text: "You receive an urgent email appearing to be from Repsol IT, asking you to click a link and reset your password immediately. What do you do?",
+        options: [
+          "I do not click the link, verify through official IT channels, and report it as a phishing attempt.",
+          "I click the link because it looks urgent and official.",
+          "I report it with full email headers to the security team and brief my team on the specific threat.",
+          "I hesitate and ask a colleague if they received the same email."
+        ],
+        scores: [3, 1, 4, 2]
+      },
+      {
+        type: "self_report",
+        text: "When working remotely (from home or a public location), how do you protect company data?",
+        options: [
+          "I enforce and communicate remote security policies for my team and conduct security awareness sessions.",
+          "I connect to whatever Wi-Fi is available and work as normal.",
+          "I use VPN, lock my screen when away, avoid public Wi-Fi, and follow Repsol's remote work security policy.",
+          "I use the company VPN and avoid working in very public places."
+        ],
+        scores: [4, 1, 3, 2]
+      },
+      {
+        type: "knowledge_check",
+        text: "What is multi-factor authentication (MFA) and why is it important?",
+        options: [
+          "Using multiple different web browsers to access company systems, to avoid tracking.",
+          "A security method requiring more than one form of verification (e.g., password + a code sent to your phone) to access an account — making it much harder for attackers to break in even if they steal your password.",
+          "Having several different passwords saved for the same account as a backup.",
+          "An advanced antivirus software automatically installed by the IT department."
+        ],
+        correct: 1,
+        explanation: "MFA adds a second layer of security beyond the password. Even if an attacker obtains your password, they cannot access your account without the second factor (e.g., a phone code or biometric scan)."
+      }
+    ]
+  }
+];
+
+const PD_QUESTIONS = [
+  {
+    id: "pd_areas",
+    type: "multi_select",
+    text: "Which of the following skill areas would you like to develop beyond what your current role requires?",
+    options: [
+      "Data Science & Advanced Analytics",
+      "Generative AI & Prompt Engineering",
+      "Cloud Computing & Architecture",
+      "Cybersecurity & Risk Management",
+      "Leadership & Digital Transformation",
+      "Project Management & Agile Methodologies",
+      "Programming & Software Development",
+      "Business Intelligence & Data Visualisation"
+    ]
+  },
+  {
+    id: "pd_motivation",
+    type: "single_select",
+    text: "What best describes your primary motivation for developing skills beyond your current role?",
+    options: [
+      "Preparing for a promotion within my current department",
+      "Exploring a potential career change to a different function at Repsol",
+      "Personal interest and curiosity — I enjoy learning new technologies",
+      "Staying competitive and relevant as the industry evolves"
+    ]
+  },
+  {
+    id: "pd_format",
+    type: "single_select",
+    text: "How would you prefer to receive optional learning content for personal development?",
+    options: [
+      "Short daily nudges I can complete in under 10 minutes",
+      "Weekly self-paced modules I can schedule around my work",
+      "Intensive workshops or structured bootcamps",
+      "Unscheduled deep-dives that I initiate when I feel motivated"
+    ]
+  },
+  {
+    id: "pd_digital_habits",
+    type: "single_select",
+    text: "Which statement best describes your relationship with digital technology outside of work?",
+    options: [
+      "I use only what is needed for daily life — nothing beyond the basics",
+      "I occasionally try new apps or tools when a friend recommends them",
+      "I actively follow tech trends and experiment with new tools regularly",
+      "I build, customise, or code digital tools as a personal hobby"
+    ]
+  },
+  {
+    id: "pd_priority_skill",
+    type: "single_select",
+    text: "If the system could accelerate your growth in one domain over the next six months, which would you choose?",
+    options: [
+      "Artificial Intelligence & Machine Learning",
+      "Data Analysis & Business Intelligence",
+      "Digital Security & Privacy",
+      "Collaboration, Productivity & Workplace Tools"
+    ]
+  }
+];
+
+const LETTERS = ["A","B","C","D","E","F","G","H"];
+const LEVEL_LABELS = ["","Awareness","Basic","Intermediate","Expert"];
+const LEVEL_COLORS = ["","#C8102E","#E07000","#185FA5","#1A7A3C"];
+const TOTAL_STEPS = CATEGORIES.length + 1; // 7 categories + 1 PD step
+
+let currentStep = 0; // 0–6 = categories, 7 = PD
+let answers = [];
+let pdAnswers = []; // index 0 = array (multi-select), 1–4 = number|null (single-select)
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function startAssessment() {
+  const roleSelect = document.getElementById('role-select');
+  if (!roleSelect.value) {
+    document.getElementById('role-error').style.display = 'block';
+    roleSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  selectedRole = roleSelect.value;
+  document.getElementById('role-error').style.display = 'none';
+
+  currentStep = 0;
+  answers = CATEGORIES.map(c => c.questions.map(() => null));
+  pdAnswers = [[], null, null, null, null];
+  renderStep();
+  showScreen('screen-assess');
+}
+
+function renderStep() {
+  const btn = document.getElementById('next-btn');
+
+  if (currentStep < CATEGORIES.length) {
+    document.getElementById('cat-step').style.display = 'block';
+    document.getElementById('pd-step').style.display = 'none';
+
+    const cat = CATEGORIES[currentStep];
+    document.getElementById('prog-text').textContent = `Step ${currentStep + 1} of ${TOTAL_STEPS}`;
+    document.getElementById('prog-cat-name').textContent = cat.shortLabel;
+    document.getElementById('prog-fill').style.width = `${((currentStep + 1) / TOTAL_STEPS) * 100}%`;
+    document.getElementById('cat-title').textContent = cat.label;
+    document.getElementById('cat-desc').textContent = cat.desc;
+
+    btn.textContent = 'Next →';
+    btn.disabled = true;
+
+    renderQuestions(cat);
+
+  } else {
+    document.getElementById('cat-step').style.display = 'none';
+    document.getElementById('pd-step').style.display = 'block';
+
+    document.getElementById('prog-text').textContent = `Step ${TOTAL_STEPS} of ${TOTAL_STEPS} — Optional`;
+    document.getElementById('prog-cat-name').textContent = 'Personal Development';
+    document.getElementById('prog-fill').style.width = '100%';
+
+    btn.textContent = 'Submit Assessment →';
+    btn.disabled = false;
+
+    renderPDStep();
+  }
+}
+
+function renderQuestions(cat) {
+  const container = document.getElementById('questions-container');
+  container.innerHTML = '';
+
+  cat.questions.forEach((q, qi) => {
+    const block = document.createElement('div');
+    block.className = 'question-block';
+
+    const label = document.createElement('div');
+    label.className = 'q-label';
+    const qnum = document.createElement('span');
+    qnum.className = 'q-num';
+    qnum.textContent = `Q${qi + 1}`;
+    label.appendChild(qnum);
+    if (q.type === 'knowledge_check') {
+      const tag = document.createElement('span');
+      tag.className = 'kc-tag';
+      tag.textContent = 'Knowledge Check';
+      label.appendChild(tag);
+    }
+    block.appendChild(label);
+
+    const qtext = document.createElement('div');
+    qtext.className = 'q-text';
+    qtext.textContent = q.text;
+    block.appendChild(qtext);
+
+    const optsList = document.createElement('div');
+    optsList.className = 'options-list';
+
+    q.options.forEach((opt, oi) => {
+      const lbl = document.createElement('label');
+      lbl.className = 'opt-label';
+
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = `cat${currentStep}_q${qi}`;
+      radio.value = oi;
+
+      const letter = document.createElement('span');
+      letter.className = 'opt-letter';
+      letter.textContent = LETTERS[oi];
+      lbl.appendChild(radio);
+      lbl.appendChild(letter);
+
+      const text = document.createElement('span');
+      text.textContent = opt;
+      lbl.appendChild(text);
+
+      radio.addEventListener('change', () => {
+        optsList.querySelectorAll('.opt-label').forEach(l => l.classList.remove('selected'));
+        lbl.classList.add('selected');
+        answers[currentStep][qi] = oi;
+        checkAllAnswered();
+      });
+
+      if (answers[currentStep][qi] === oi) lbl.classList.add('selected');
+      optsList.appendChild(lbl);
+    });
+
+    block.appendChild(optsList);
+
+    if (qi < cat.questions.length - 1) {
+      const div = document.createElement('div');
+      div.className = 'divider';
+      block.appendChild(div);
+    }
+
+    container.appendChild(block);
+  });
+}
+
+function renderPDStep() {
+  const container = document.getElementById('pd-questions-container');
+  container.innerHTML = '';
+
+  PD_QUESTIONS.forEach((q, qi) => {
+    const block = document.createElement('div');
+    block.className = 'pd-field';
+
+    const lbl = document.createElement('label');
+    lbl.innerHTML = `<strong>Q${qi + 1}.</strong> ${q.text}`;
+    if (q.type === 'multi_select') {
+      lbl.innerHTML += ' <span>(Select all that apply)</span>';
+    }
+    block.appendChild(lbl);
+
+    const optsList = document.createElement('div');
+    optsList.className = 'options-list';
+    optsList.style.marginTop = '0.6rem';
+
+    q.options.forEach((opt, oi) => {
+      const optLbl = document.createElement('label');
+      optLbl.className = 'opt-label pd-opt';
+
+      const letter = document.createElement('span');
+      letter.className = 'opt-letter';
+      letter.textContent = LETTERS[oi];
+
+      const text = document.createElement('span');
+      text.textContent = opt;
+
+      if (q.type === 'multi_select') {
+        const chk = document.createElement('input');
+        chk.type = 'checkbox';
+        chk.style.display = 'none';
+        optLbl.appendChild(chk);
+        optLbl.appendChild(letter);
+        optLbl.appendChild(text);
+
+        if (pdAnswers[0].includes(oi)) optLbl.classList.add('selected');
+
+        optLbl.addEventListener('click', (e) => {
+          e.preventDefault();
+          const pos = pdAnswers[0].indexOf(oi);
+          if (pos === -1) { pdAnswers[0].push(oi); optLbl.classList.add('selected'); }
+          else { pdAnswers[0].splice(pos, 1); optLbl.classList.remove('selected'); }
+        });
+      } else {
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = `pd_q${qi}`;
+        radio.style.display = 'none';
+        optLbl.appendChild(radio);
+        optLbl.appendChild(letter);
+        optLbl.appendChild(text);
+
+        if (pdAnswers[qi] === oi) optLbl.classList.add('selected');
+
+        optLbl.addEventListener('click', () => {
+          optsList.querySelectorAll('.opt-label').forEach(l => l.classList.remove('selected'));
+          optLbl.classList.add('selected');
+          pdAnswers[qi] = oi;
+        });
+      }
+
+      optsList.appendChild(optLbl);
+    });
+
+    block.appendChild(optsList);
+
+    if (qi < PD_QUESTIONS.length - 1) {
+      const div = document.createElement('div');
+      div.className = 'divider';
+      block.appendChild(div);
+    }
+
+    container.appendChild(block);
+  });
+}
+
+function checkAllAnswered() {
+  const allAnswered = answers[currentStep].every(a => a !== null);
+  document.getElementById('next-btn').disabled = !allAnswered;
+}
+
+function nextStep() {
+  if (currentStep < TOTAL_STEPS - 1) {
+    currentStep++;
+    renderStep();
+    window.scrollTo(0, 0);
+  } else {
+    renderResults();
+    showScreen('screen-results');
+  }
+}
+
+function computeScore(catIdx) {
+  const cat = CATEGORIES[catIdx];
+  const ans = answers[catIdx];
+  const scores = cat.questions.map((q, qi) => {
+    if (q.type === 'self_report') return q.scores[ans[qi]];
+    return ans[qi] === q.correct ? 3 : 1;
+  });
+  const srScores = scores.slice(0, 2);
+  const kcScore = scores[2];
+  const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+  let final = Math.floor(avg);
+
+  const srAvg = (srScores[0] + srScores[1]) / 2;
+  const kcWrong = kcScore === 1;
+  const overconfident = kcWrong && srAvg >= 3;
+  if (overconfident) final = Math.min(final, 2);
+  final = Math.max(1, Math.min(4, final));
+
+  const requiredLevel = ROLES[selectedRole]?.[cat.id] ?? null;
+  const belowRequirement = requiredLevel !== null && final < requiredLevel;
+
+  return { final, scores, srAvg, kcScore, kcWrong, overconfident,
+    immNudge: final === 1, knowledgeGap: overconfident,
+    requiredLevel, belowRequirement };
+}
+
+// Mirrors the Observer agent's priority order: being ahead of what your role
+// requires is never a gap, no matter what else is flagged — so a real
+// deficit against the employee's OWN ROLE requirement always comes first.
+// An overconfidence (knowledgeGap) flag only jumps the queue AMONG skills
+// that are already behind; it can't override a skill where the requirement
+// is already met. Falls back to PD priority, then lowest absolute level.
+function detectSkillGap(results, pdAnswers) {
+  const entries = CATEGORIES.map((cat, i) => ({ id: cat.id, label: cat.shortLabel, ...results[i] }));
+
+  const behind = entries.filter(e => e.requiredLevel !== null && e.requiredLevel - e.final > 0);
+  if (behind.length) {
+    const flaggedBehind = behind.filter(e => e.knowledgeGap);
+    const pool = flaggedBehind.length ? flaggedBehind : behind;
+    const worst = pool.reduce((a, b) => (b.requiredLevel - b.final) > (a.requiredLevel - a.final) ? b : a);
+    if (flaggedBehind.length) {
+      return { skill: worst.label, skillId: worst.id, reason: 'knowledge_gap',
+        text: `${worst.label} is both behind ${selectedRole}'s required level ${worst.requiredLevel} (at ${worst.final}) AND flagged overconfident — confidently wrong about something the job actually needs, so it's prioritised over other deficits.` };
+    }
+    return { skill: worst.label, skillId: worst.id, reason: 'role_requirement',
+      text: `${selectedRole} requires ${worst.label} level ${worst.requiredLevel}, but they're at level ${worst.final} — the largest gap against this role's actual requirement.` };
+  }
+
+  // Nobody's behind their role's requirement. A knowledge_gap on a skill
+  // with no role target (e.g. Power BI) is still worth a nudge.
+  const gapEntry = entries.find(e => e.knowledgeGap);
+  if (gapEntry) {
+    return { skill: gapEntry.label, skillId: gapEntry.id, reason: 'knowledge_gap',
+      text: `No role-required deficit, but ${gapEntry.label} is flagged overconfident (self-report avg ≥ 3, knowledge check wrong, capped at ${gapEntry.final}).` };
+  }
+
+  const priorityIdx = pdAnswers[4];
+  if (priorityIdx !== null) {
+    const wantedId = PD_PRIORITY_TO_SKILL[priorityIdx];
+    const wanted = entries.find(e => e.id === wantedId);
+    if (wanted && wanted.final < 4) {
+      return { skill: wanted.label, skillId: wanted.id, reason: 'personal_development',
+        text: `No mandatory gap — honoring their stated personal development priority: ${wanted.label} (currently level ${wanted.final}).` };
+    }
+  }
+
+  const lowest = entries.reduce((a, b) => (b.final < a.final ? b : a));
+  return { skill: lowest.label, skillId: lowest.id, reason: 'lowest_level',
+    text: `No mandatory or role-based gap — ${lowest.label} is their lowest-scoring category (level ${lowest.final}).` };
+}
+
+function renderResults() {
+  // ── Skill profile cards ──
+  const grid = document.getElementById('results-grid');
+  grid.innerHTML = '';
+  const kcContent = document.getElementById('kc-review-content');
+  kcContent.innerHTML = '';
+  const allResults = [];
+
+  CATEGORIES.forEach((cat, ci) => {
+    const result = computeScore(ci);
+    allResults.push(result);
+    const pct = (result.final / 4) * 100;
+    const col = LEVEL_COLORS[result.final];
+    const reqNote = result.requiredLevel !== null
+      ? `<div style="font-size:0.74rem; color:var(--muted); margin-top:-0.3rem; margin-bottom:0.6rem;">Role requires level ${result.requiredLevel}</div>` : '';
+
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    card.innerHTML = `
+      <div class="result-card-top">
+        <span class="result-cat-name">${cat.shortLabel}</span>
+        <div class="score-circle" style="background:${col}">
+          <span class="sc-num">${result.final}</span>
+          <span class="sc-label">/ 4</span>
+        </div>
+      </div>
+      <div class="level-name">${LEVEL_LABELS[result.final]}</div>
+      ${reqNote}
+      <div class="result-bar-track">
+        <div class="result-bar-fill" style="width:${pct}%; background:${col}"></div>
+      </div>
+      <div class="result-flags">
+        ${result.immNudge ? '<span class="r-flag nudge">Immediate Nudge Priority</span>' : ''}
+        ${result.knowledgeGap ? '<span class="r-flag gap">Knowledge Gap Detected</span>' : ''}
+        ${!result.knowledgeGap && result.belowRequirement ? '<span class="r-flag gap">Below Role Requirement</span>' : ''}
+      </div>`;
+    grid.appendChild(card);
+
+    // KC accordion item
+    const kcQ = cat.questions[2];
+    const userAns = answers[ci][2];
+    const optsHtml = kcQ.options.map((opt, oi) => {
+      let cls = 'kc-opt';
+      let icon = '';
+      if (oi === kcQ.correct) { cls += ' correct'; icon = ' ✓'; }
+      else if (oi === userAns && oi !== kcQ.correct) { cls += ' wrong-pick'; icon = ' ✗ your answer'; }
+      return `<div class="${cls}"><span class="kc-opt-letter">${LETTERS[oi]}.</span><span>${opt}${icon}</span></div>`;
+    }).join('');
+    const kcStatus = result.kcWrong
+      ? `<span style="color:var(--red);font-weight:600">✗ Incorrect</span>`
+      : `<span style="color:var(--green);font-weight:600">✓ Correct</span>`;
+    const item = document.createElement('div');
+    item.className = 'kc-review-item';
+    item.innerHTML = `
+      <div class="kc-review-cat">${cat.shortLabel} — Knowledge Check ${kcStatus}</div>
+      <div class="kc-review-q">${kcQ.text}</div>
+      <div class="kc-opts">${optsHtml}</div>
+      <div class="kc-explain"><strong>Explanation:</strong> ${kcQ.explanation}</div>`;
+    kcContent.appendChild(item);
+  });
+
+  // ── Detected skill gap (what the Observer would act on) — overridable ──
+  const gap = detectSkillGap(allResults, pdAnswers);
+  document.getElementById('gap-result-box').style.display = 'block';
+  document.getElementById('gap-result-content').innerHTML = `
+    <div style="font-size:1.05rem; font-weight:600; color:var(--dark); margin-bottom:0.4rem;">
+      Role: ${selectedRole} → Prioritising: ${gap.skill}
+    </div>
+    <div style="font-size:0.88rem; color:var(--mid);">${gap.text}</div>`;
+
+  const override = document.getElementById('skill-override');
+  override.innerHTML = CATEGORIES.map((cat, ci) => {
+    const r = allResults[ci];
+    const reqNote = r.requiredLevel !== null ? `, role needs ${r.requiredLevel}` : '';
+    return `<option value="${cat.id}" ${cat.id === gap.skillId ? 'selected' : ''}>${cat.shortLabel} (level ${r.final}${reqNote})</option>`;
+  }).join('');
+
+  // ── Personal development answers ──
+  const pdBox = document.getElementById('pd-results-box');
+  const pdContent = document.getElementById('pd-results-content');
+  pdContent.innerHTML = '';
+
+  const hasAnyPD = pdAnswers[0].length > 0 || pdAnswers.slice(1).some(a => a !== null);
+  if (hasAnyPD) {
+    pdBox.style.display = 'block';
+    PD_QUESTIONS.forEach((q, qi) => {
+      let answerText = '';
+      if (q.type === 'multi_select') {
+        const sel = pdAnswers[0];
+        answerText = sel.length > 0 ? [...sel].sort((a,b) => a-b).map(i => q.options[i]).join('; ') : '';
+      } else {
+        answerText = pdAnswers[qi] !== null ? q.options[pdAnswers[qi]] : '';
+      }
+      const block = document.createElement('div');
+      block.className = 'pd-answer-block';
+      block.innerHTML = `
+        <div class="pd-answer-q">Q${qi + 1}. ${q.text}</div>
+        <div class="${answerText ? 'pd-answer-text' : 'pd-skipped'}">${answerText || 'Not answered'}</div>`;
+      pdContent.appendChild(block);
+    });
+  } else {
+    pdBox.style.display = 'none';
+  }
+}
+
+function toggleAccordion() {
+  document.getElementById('acc-toggle').classList.toggle('open');
+  document.getElementById('acc-body').classList.toggle('open');
+}
+
+function retake() {
+  showScreen('screen-landing');
+  document.getElementById('acc-toggle').classList.remove('open');
+  document.getElementById('acc-body').classList.remove('open');
+  document.getElementById('role-select').value = '';
+  document.getElementById('role-error').style.display = 'none';
+  selectedRole = null;
+}
+</script>
+</body>
+</html>
