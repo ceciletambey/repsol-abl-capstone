@@ -22,7 +22,7 @@ load_dotenv()
 
 from assessment.data import (CATEGORIES, PD_PRIORITY_IDS, PD_QUESTIONS, ROLES, build_footprint,
                               evaluate_outcome, score_questions)
-from agents.observer import detect_gap
+from agents.observer import detect_gap, detect_all_gaps, PD_PRIORITY_TO_SKILL
 import storage
 
 st.set_page_config(page_title="Repsol ABL", page_icon="🟠", layout="centered")
@@ -288,7 +288,8 @@ if not selected_employee:
 # previous one's footprint/pipeline/re-assessment state — wipe everything
 # scoped to a single employee before adopting the new one.
 if st.session_state.get("employee") != selected_employee:
-    for key in ["footprint", "role", "delivery_format", "pipeline_results",
+    for key in ["footprint", "role", "pipeline_results",
+                "required_skills", "pd_skills",
                 "show_reassessment", "reassessment_results", "profile_loaded_for"]:
         st.session_state.pop(key, None)
     for key in [k for k in st.session_state if k.startswith("cycle_saved_")]:
@@ -344,7 +345,6 @@ if "footprint" not in st.session_state:
                                key=q["id"], index=None)
                 pd_answers[q["id"]] = idx
 
-        fmt = st.radio("Delivery format for the nudge", ["text", "audio"], horizontal=True)
         submitted = st.form_submit_button("Submit assessment", type="primary")
 
         if submitted:
@@ -357,7 +357,6 @@ if "footprint" not in st.session_state:
                 footprint = build_footprint(category_answers, pd_answers, role=role)
                 st.session_state["footprint"] = footprint
                 st.session_state["role"] = role
-                st.session_state["delivery_format"] = fmt
                 storage.save_profile(employee, role, footprint)
                 st.rerun()
 else:
@@ -403,14 +402,9 @@ else:
                 else:
                     st.error("Please select your top development priority.")
 
-    st.session_state.setdefault("delivery_format", "text")
-    st.session_state["delivery_format"] = st.radio(
-        "Delivery format for the nudge", ["text", "audio"], horizontal=True,
-        index=["text", "audio"].index(st.session_state["delivery_format"]),
-    )
-
     if st.button("Retake full baseline assessment"):
-        for key in ["footprint", "role", "delivery_format", "pipeline_results", "show_reassessment", "reassessment_results"]:
+        for key in ["footprint", "role", "pipeline_results",
+                    "required_skills", "pd_skills", "show_reassessment", "reassessment_results"]:
             st.session_state.pop(key, None)
         for key in [k for k in st.session_state if k.startswith("cycle_saved_")]:
             st.session_state.pop(key, None)
@@ -423,6 +417,21 @@ if "footprint" in st.session_state and "pipeline_results" not in st.session_stat
     skill_data = {k: v for k, v in footprint.items() if k != "personal_development"}
     pd_data = footprint.get("personal_development", {})
     suggested, reason = detect_gap(skill_data, pd_data)
+    all_gaps = detect_all_gaps(skill_data)
+
+    # The employee's stated personal-development priority (from the assessment's
+    # PD question) should be pre-selected too, alongside the role gaps — not just
+    # left for them to notice and add manually. Skip it if they're already maxed
+    # out on it, same rule the Observer uses to decide it's worth nudging on.
+    pd_priority_skill = PD_PRIORITY_TO_SKILL.get(pd_data.get("priority_skill"))
+    if pd_priority_skill and pd_priority_skill in skill_data and skill_data[pd_priority_skill].get("level", 0) >= 4:
+        pd_priority_skill = None
+
+    default_skills = list(all_gaps)
+    if pd_priority_skill and pd_priority_skill not in default_skills:
+        default_skills.append(pd_priority_skill)
+    if not default_skills:
+        default_skills = [suggested]
 
     reason_text = {
         "knowledge_gap": "an overconfidence flag on a skill behind your role's requirement",
@@ -430,10 +439,18 @@ if "footprint" in st.session_state and "pipeline_results" not in st.session_stat
         "personal_development": "your stated personal development priority",
         "lowest_level": "your lowest-scoring category",
     }.get(reason, reason)
-    st.caption(f"Suggested: **{suggested}** — based on {reason_text}. You can work on more than one at a time.")
+    if all_gaps:
+        caption = (f"Pre-selected: **{', '.join(all_gaps)}** — every skill currently below your "
+                   f"role's required level. Top priority: **{suggested}** ({reason_text}).")
+        if pd_priority_skill:
+            caption += f" Also pre-selected for personal development: **{pd_priority_skill}**."
+        caption += " Add or remove skills below as you like."
+        st.caption(caption)
+    else:
+        st.caption(f"Suggested: **{suggested}** — based on {reason_text}. You can work on more than one at a time.")
 
     skill_ids = list(skill_data.keys())
-    chosen_skills = st.multiselect("Skills to focus on", skill_ids, default=[suggested])
+    chosen_skills = st.multiselect("Skills to focus on", skill_ids, default=default_skills)
 
 # ============ STEP 3: RUN PIPELINE (once per chosen skill) ============
 if "footprint" in st.session_state and "pipeline_results" not in st.session_state:
@@ -451,22 +468,26 @@ if "footprint" in st.session_state and "pipeline_results" not in st.session_stat
                         results[skill] = pipeline.invoke({
                             "footprint": json.dumps(st.session_state["footprint"]),
                             "chosen_skill": skill,
-                            "delivery_format": st.session_state["delivery_format"],
                             "loop_step": 0,
                             "messages": [],
                         })
                 st.session_state["pipeline_results"] = results
+                # Remember which chosen skills were an actual role gap vs. an
+                # extra the employee picked for their own development, so step 4
+                # can split the nudges into the two sections.
+                st.session_state["required_skills"] = [s for s in chosen_skills if s in all_gaps]
+                st.session_state["pd_skills"] = [s for s in chosen_skills if s not in all_gaps]
                 st.rerun()
             except Exception as e:
                 st.error(f"Pipeline error: {e}")
                 st.caption("If this is an auth error, set GOOGLE_API_KEY (and TAVILY_API_KEY) "
                            "in Streamlit secrets or your local .env.")
 
-# ============ STEP 4: SHOW THE NUDGES (its own page, one block per skill) ============
+# ============ STEP 4: SHOW THE NUDGES (its own page, split required vs. PD) ============
 if "pipeline_results" in st.session_state and not st.session_state.get("show_reassessment"):
     st.header("3 · Run the ABL pipeline")
 
-    for skill, result in st.session_state["pipeline_results"].items():
+    def render_nudge(skill, result):
         nudge = result["final_nudge"]
         st.subheader(f"📣 Learning Nudge — {skill}")
         st.caption(f"{len(nudge['items'])} source(s) gathered for this skill.")
@@ -480,6 +501,24 @@ if "pipeline_results" in st.session_state and not st.session_state.get("show_rea
                 st.write(item["content"])
         with st.expander(f"Raw nudge payload (JSON) — {skill}"):
             st.json(nudge)
+
+    pipeline_results = st.session_state["pipeline_results"]
+    required_skills = [s for s in st.session_state.get("required_skills", []) if s in pipeline_results]
+    pd_skills = [s for s in st.session_state.get("pd_skills", []) if s in pipeline_results]
+
+    if required_skills:
+        st.subheader("🎯 Required skills")
+        st.caption("Trainings for the skill gaps detected against your role's requirements.")
+        for skill in required_skills:
+            render_nudge(skill, pipeline_results[skill])
+
+    st.subheader("🌱 Personal development skills")
+    if pd_skills:
+        st.caption("Trainings for the extra skills you chose to work on for your own development.")
+        for skill in pd_skills:
+            render_nudge(skill, pipeline_results[skill])
+    else:
+        st.info("No personal development skills were selected for this cycle.")
 
     if st.button("Next → Re-assessment", type="primary"):
         st.session_state["show_reassessment"] = True
