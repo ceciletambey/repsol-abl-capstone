@@ -11,6 +11,10 @@ __pycache__/
 # Vector store (binary — rebuild via ingestion script instead)
 chroma_db/
 
+# Persistent memory DB (local — rebuilt/seeded automatically on startup)
+abl_memory.db
+*.db
+
 # OS / editor
 .DS_Store
 .vscode/

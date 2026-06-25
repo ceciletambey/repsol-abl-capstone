@@ -15,18 +15,94 @@ Deploy:        push to GitHub, then deploy on share.streamlit.io
 
 import json
 import streamlit as st
+import pandas as pd
 from dotenv import load_dotenv
 
 load_dotenv()
 
 from assessment.data import CATEGORIES, PD_QUESTIONS, ROLES, build_footprint, evaluate_outcome, score_questions
 from agents.observer import detect_gap
+import storage
 
 st.set_page_config(page_title="Repsol ABL", page_icon="🎯", layout="centered")
+
+storage.seed_demo_employee()
 
 st.title("Repsol ABL — Agentic Based Learning")
 st.caption("Assessment → Observer → Curator → Formatter → Delivery → Evaluator's "
            "re-assessment. A proof-of-concept learning loop, not a full platform.")
+
+view = st.sidebar.radio("View", ["🎯 Learning loop", "📈 My Progress"])
+
+if view == "📈 My Progress":
+    st.header("📈 My Progress")
+    employees = storage.list_employees()
+
+    if not employees:
+        st.info("No learning cycles recorded yet for anyone. Go to the **🎯 Learning loop** "
+                "tab, pick or create an employee, and complete a cycle to start tracking "
+                "progress here.")
+        st.stop()
+
+    active_employee = st.session_state.get("employee")
+    default_idx = employees.index(active_employee) if active_employee in employees else 0
+    employee = st.selectbox("Employee", employees, index=default_idx)
+
+    history = storage.get_history(employee)
+    if not history:
+        st.info(f"No learning cycles recorded yet for **{employee}**. Complete an "
+                "assessment → nudge → re-assessment cycle in the **🎯 Learning loop** tab "
+                "to start tracking progress here.")
+        st.stop()
+
+    st.caption(f"Showing progress for **{employee}** — {len(history)} recorded cycle(s).")
+
+    df = pd.DataFrame(history)
+    df["created_at"] = pd.to_datetime(df["created_at"])
+    df = df.sort_values("created_at")
+
+    st.subheader("Level over time, per skill")
+    for skill in sorted(df["skill"].unique()):
+        skill_df = df[df["skill"] == skill]
+        st.markdown(f"**{skill}**")
+        chart_df = skill_df.set_index("created_at")[["after_level"]].rename(columns={"after_level": "level"})
+        st.line_chart(chart_df)
+
+    st.subheader("Current level vs. required level")
+    latest = df.groupby("skill", as_index=False).tail(1)
+    summary = pd.DataFrame({
+        "Skill": latest["skill"],
+        "Current level": latest["after_level"],
+        "Required level": latest["required_level"].apply(lambda r: str(int(r)) if pd.notna(r) else "—"),
+        "Status": [
+            "—" if pd.isna(req) else ("✅ Met" if after >= req else "⚠️ Gap")
+            for after, req in zip(latest["after_level"], latest["required_level"])
+        ],
+    })
+    st.table(summary.set_index("Skill"))
+    st.stop()
+
+# ============ STEP 0: WHO ARE YOU? ============
+st.header("0 · Who are you?")
+
+existing_employees = storage.list_employees()
+employee_choice = st.selectbox(
+    "Employee name or ID",
+    ["— Select —", "+ New employee"] + existing_employees,
+    index=0,
+)
+if employee_choice == "+ New employee":
+    new_employee = st.text_input("Enter new employee name or ID")
+    if new_employee.strip():
+        st.session_state["employee"] = new_employee.strip()
+elif employee_choice != "— Select —":
+    st.session_state["employee"] = employee_choice
+
+if not st.session_state.get("employee"):
+    st.info("Select or create an employee to continue.")
+    st.stop()
+
+st.success(f"Working as: **{st.session_state['employee']}**")
 
 # ============ STEP 1: REAL BASELINE ASSESSMENT ============
 st.header("1 · Baseline assessment")
@@ -72,6 +148,7 @@ if "footprint" not in st.session_state:
                 st.error(f"Please answer every question — missing: {', '.join(missing)}")
             else:
                 st.session_state["footprint"] = build_footprint(category_answers, pd_answers, role=role)
+                st.session_state["role"] = role
                 st.session_state["delivery_format"] = fmt
                 st.rerun()
 else:
@@ -88,7 +165,9 @@ else:
                 note = f"below role requirement"
             st.metric(label, v["level"], note)
     if st.button("Retake assessment"):
-        for key in ["footprint", "delivery_format", "pipeline_results", "show_reassessment", "reassessment_results"]:
+        for key in ["footprint", "role", "delivery_format", "pipeline_results", "show_reassessment", "reassessment_results"]:
+            st.session_state.pop(key, None)
+        for key in [k for k in st.session_state if k.startswith("cycle_saved_")]:
             st.session_state.pop(key, None)
         st.rerun()
 
@@ -217,12 +296,27 @@ if st.session_state.get("show_reassessment"):
             else:
                 st.error(f"❌ BAD — {explanation}")
 
+            saved_key = f"cycle_saved_{skill}"
+            if not st.session_state.get(saved_key):
+                storage.save_cycle(
+                    employee=st.session_state["employee"],
+                    role=st.session_state.get("role"),
+                    skill=skill,
+                    before_level=before,
+                    after_level=after,
+                    required_level=required,
+                    verdict=verdict,
+                )
+                st.session_state[saved_key] = True
+
             if verdict != "GOOD" and st.button(f"🔁 Go through the content again & retake — {skill}"):
                 reassessment_results.pop(skill, None)
+                st.session_state.pop(saved_key, None)
                 st.session_state["show_reassessment"] = False
                 st.rerun()
             elif verdict == "GOOD" and st.button(f"🔁 Retake anyway — {skill}"):
                 reassessment_results.pop(skill, None)
+                st.session_state.pop(saved_key, None)
                 st.rerun()
 
         st.divider()
