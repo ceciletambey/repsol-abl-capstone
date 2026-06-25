@@ -368,7 +368,7 @@ def score_questions(questions, answers):
     floor(avg score), capped at 2 if a knowledge check was wrong while the
     self-report average was confident (>=3)."""
     scores = [
-        q["scores"][a] if q["type"] == "self_report" else (3 if a == q["correct"] else 1)
+        q["scores"][a] if q["type"] == "self_report" else (4 if a == q["correct"] else 1)
         for q, a in zip(questions, answers)
     ]
     sr_scores = [s for q, s in zip(questions, scores) if q["type"] == "self_report"]
