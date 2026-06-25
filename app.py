@@ -236,12 +236,18 @@ if view == "My Progress":
     df = df.sort_values("created_at")
 
     st.subheader("Level over time, per skill")
+    st.caption("The red line, where shown, is the role's required level for that skill - the target to reach.")
     brand_palette = ["#FF8200", "#19A7C0", "#ED2E5C", "#FFC629"]
     for i, skill in enumerate(sorted(df["skill"].unique())):
         skill_df = df[df["skill"] == skill]
         st.markdown(f'<p class="repsol-sublabel">{skill}</p>', unsafe_allow_html=True)
         chart_df = skill_df.set_index("created_at")[["after_level"]].rename(columns={"after_level": "level"})
-        st.line_chart(chart_df, color=brand_palette[i % len(brand_palette)])
+        colors = [brand_palette[i % len(brand_palette)]]
+        required = skill_df["required_level"].dropna()
+        if not required.empty:
+            chart_df["Required level"] = required.iloc[-1]
+            colors.append("#D62728")
+        st.line_chart(chart_df, color=colors)
 
     st.subheader("Current level vs. required level")
     latest = df.groupby("skill", as_index=False).tail(1)
@@ -509,14 +515,14 @@ elif page == "nudges":
         st.session_state["page"] = "setup"
         st.rerun()
 
-    st.header("Learning nudges")
-    if st.button("Back to setup"):
+    if st.button("← Back to setup"):
         st.session_state["page"] = "setup"
         st.rerun()
 
+    st.header("Learning nudges")
+
     def render_nudge(skill, result):
         nudge = result["final_nudge"]
-        st.subheader(f"Learning Nudge - {skill}")
         st.caption(f"{len(nudge['items'])} source(s) gathered for this skill.")
         for item in nudge["items"]:
             with st.container(border=True):
@@ -532,20 +538,18 @@ elif page == "nudges":
     pipeline_results = st.session_state["pipeline_results"]
     required_skills = [s for s in st.session_state.get("required_skills", []) if s in pipeline_results]
     pd_skills = [s for s in st.session_state.get("pd_skills", []) if s in pipeline_results]
+    # One tab per skill, named by skill, so several skills don't all stack
+    # into one long scroll - clicking a tab swaps the content in place.
+    ordered_skills = required_skills + [s for s in pd_skills if s not in required_skills]
 
-    if required_skills:
-        st.subheader("Required skills")
-        st.caption("Trainings for the skill gaps detected against your role's requirements.")
-        for skill in required_skills:
-            render_nudge(skill, pipeline_results[skill])
-
-    st.subheader("Personal development skills")
-    if pd_skills:
-        st.caption("Trainings for the extra skills you chose to work on for your own development.")
-        for skill in pd_skills:
-            render_nudge(skill, pipeline_results[skill])
+    if ordered_skills:
+        tabs = st.tabs(ordered_skills)
+        for tab, skill in zip(tabs, ordered_skills):
+            with tab:
+                st.caption("Required skill" if skill in required_skills else "Personal development")
+                render_nudge(skill, pipeline_results[skill])
     else:
-        st.info("No personal development skills were selected for this cycle.")
+        st.info("No skills were selected for this cycle.")
 
     if st.button("Next: Re-assessment", type="primary"):
         st.session_state["page"] = "quiz"
@@ -565,42 +569,44 @@ elif page == "quiz":
         st.session_state["page"] = "results"
         st.rerun()
 
-    st.header("Re-assessment - after you've gone through the content")
-    if st.button("Back to nudges"):
+    if st.button("← Back to nudges"):
         st.session_state["page"] = "nudges"
         st.rerun()
 
-    for skill in unanswered:
-        result = pipeline_results[skill]
-        st.markdown(f"### {skill}")
-        reassessment = result.get("reassessment", {})
-        questions = reassessment.get("questions", [])
+    st.header("Re-assessment - after you've gone through the content")
 
-        if not questions:
-            st.warning(f"The Evaluator didn't return a usable quiz for {skill} - check GOOGLE_API_KEY / logs.")
-            reassessment_results[skill] = {"final": result["detected_level"], "knowledge_gap": False, "skipped": True}
-            st.divider()
-            continue
+    # One tab per skill still needing a quiz, named by skill, instead of
+    # stacking every skill's questions into one long scroll.
+    tabs = st.tabs(unanswered)
+    for tab, skill in zip(tabs, unanswered):
+        with tab:
+            result = pipeline_results[skill]
+            reassessment = result.get("reassessment", {})
+            questions = reassessment.get("questions", [])
 
-        sources = ", ".join(reassessment.get("based_on", []))
-        st.write(f"Personalised follow-up, drawing on: *{sources}*")
-        with st.form(f"reassessment_form_{skill}"):
-            answers = []
-            for qi, q in enumerate(questions):
-                tag = " (Knowledge Check)" if q["type"] == "knowledge_check" else ""
-                idx = st.radio(q["text"] + tag, range(len(q["options"])),
-                                format_func=lambda i, q=q: q["options"][i],
-                                key=f"reassess_{skill}_{qi}", index=None)
-                answers.append(idx)
-            done = st.form_submit_button(f"Submit re-assessment - {skill}", type="primary")
+            if not questions:
+                st.warning(f"The Evaluator didn't return a usable quiz for {skill} - check GOOGLE_API_KEY / logs.")
+                reassessment_results[skill] = {"final": result["detected_level"], "knowledge_gap": False, "skipped": True}
+                continue
 
-            if done:
-                if any(a is None for a in answers):
-                    st.error("Please answer every question.")
-                else:
-                    reassessment_results[skill] = score_questions(questions, answers)
-                    st.rerun()
-        st.divider()
+            sources = ", ".join(reassessment.get("based_on", []))
+            st.write(f"Personalised follow-up, drawing on: *{sources}*")
+            with st.form(f"reassessment_form_{skill}"):
+                answers = []
+                for qi, q in enumerate(questions):
+                    tag = " (Knowledge Check)" if q["type"] == "knowledge_check" else ""
+                    idx = st.radio(q["text"] + tag, range(len(q["options"])),
+                                    format_func=lambda i, q=q: q["options"][i],
+                                    key=f"reassess_{skill}_{qi}", index=None)
+                    answers.append(idx)
+                done = st.form_submit_button(f"Submit re-assessment - {skill}", type="primary")
+
+                if done:
+                    if any(a is None for a in answers):
+                        st.error("Please answer every question.")
+                    else:
+                        reassessment_results[skill] = score_questions(questions, answers)
+                        st.rerun()
 
 # ============ PAGE: RESULTS AND SUGGESTIONS ============
 elif page == "results":
@@ -609,86 +615,88 @@ elif page == "results":
         st.session_state["page"] = "setup"
         st.rerun()
 
-    st.header("Results and suggestions")
-    if st.button("Back to nudges"):
+    if st.button("← Back to nudges"):
         st.session_state["page"] = "nudges"
         st.rerun()
+
+    st.header("Results and suggestions")
 
     reassessment_results = st.session_state.setdefault("reassessment_results", {})
     suggestions = st.session_state.setdefault("suggestions", {})
 
-    for skill, result in pipeline_results.items():
-        st.markdown(f"### {skill}")
-        outcome = reassessment_results.get(skill)
+    # One tab per skill, named by skill, instead of stacking every skill's
+    # results into one long scroll - easier to locate a specific skill.
+    skills = list(pipeline_results.keys())
+    tabs = st.tabs(skills)
+    for tab, skill in zip(tabs, skills):
+        with tab:
+            result = pipeline_results[skill]
+            outcome = reassessment_results.get(skill)
 
-        if outcome is None:
-            st.info("Re-assessment not completed yet for this skill.")
-            st.divider()
-            continue
+            if outcome is None:
+                st.info("Re-assessment not completed yet for this skill.")
+                continue
 
-        if outcome.get("skipped"):
-            st.warning(f"No usable quiz was generated for {skill} - check GOOGLE_API_KEY / logs.")
-            st.divider()
-            continue
+            if outcome.get("skipped"):
+                st.warning(f"No usable quiz was generated for {skill} - check GOOGLE_API_KEY / logs.")
+                continue
 
-        before = result["detected_level"]
-        after = outcome["final"]
-        reassessment = result.get("reassessment", {})
-        required = reassessment.get("required_level")
-        delta = after - before
+            before = result["detected_level"]
+            after = outcome["final"]
+            reassessment = result.get("reassessment", {})
+            required = reassessment.get("required_level")
+            delta = after - before
 
-        c1, c2, c3 = st.columns(3)
-        c1.metric("Before", before)
-        c2.metric("After", after)
-        c3.metric("Progression", f"+{delta}" if delta >= 0 else str(delta))
+            c1, c2, c3 = st.columns(3)
+            c1.metric("Before", before)
+            c2.metric("After", after)
+            c3.metric("Progression", f"+{delta}" if delta >= 0 else str(delta))
 
-        verdict, explanation = evaluate_outcome(before, after, required, outcome)
-        if verdict == "GOOD":
-            st.success(f"GOOD - {explanation}")
-        elif verdict == "NEEDS WORK":
-            st.warning(f"NEEDS WORK - {explanation}")
-        else:
-            st.error(f"BAD - {explanation}")
+            verdict, explanation = evaluate_outcome(before, after, required, outcome)
+            if verdict == "GOOD":
+                st.success(f"GOOD - {explanation}")
+            elif verdict == "NEEDS WORK":
+                st.warning(f"NEEDS WORK - {explanation}")
+            else:
+                st.error(f"BAD - {explanation}")
 
-        saved_key = f"cycle_saved_{skill}"
-        if not st.session_state.get(saved_key):
-            storage.save_cycle(
-                employee=st.session_state["employee"],
-                role=st.session_state.get("role"),
-                skill=skill,
-                before_level=before,
-                after_level=after,
-                required_level=required,
-                verdict=verdict,
-            )
-            st.session_state[saved_key] = True
+            saved_key = f"cycle_saved_{skill}"
+            if not st.session_state.get(saved_key):
+                storage.save_cycle(
+                    employee=st.session_state["employee"],
+                    role=st.session_state.get("role"),
+                    skill=skill,
+                    before_level=before,
+                    after_level=after,
+                    required_level=required,
+                    verdict=verdict,
+                )
+                st.session_state[saved_key] = True
 
-        if skill not in suggestions:
-            seen_titles = {i.get("title") for i in result["final_nudge"]["items"] if i.get("title")}
-            with st.spinner("Suggesting what to read next..."):
-                suggestions[skill] = suggest_next(skill, after, required, verdict, seen_titles)
-        suggestion = suggestions[skill]
+            if skill not in suggestions:
+                seen_titles = {i.get("title") for i in result["final_nudge"]["items"] if i.get("title")}
+                with st.spinner("Suggesting what to read next..."):
+                    suggestions[skill] = suggest_next(skill, after, required, verdict, seen_titles)
+            suggestion = suggestions[skill]
 
-        st.markdown("**Suggested next read**")
-        with st.container(border=True):
-            platform_tag = f" - {suggestion['platform']}" if suggestion.get("platform") else ""
-            st.markdown(f"**{suggestion['title']}**{platform_tag}")
-            if suggestion.get("url"):
-                st.markdown(f"[Open link]({suggestion['url']})")
-            st.write(suggestion["text"])
-            st.caption(suggestion["rationale"])
+            st.markdown("**Suggested next read**")
+            with st.container(border=True):
+                platform_tag = f" - {suggestion['platform']}" if suggestion.get("platform") else ""
+                st.markdown(f"**{suggestion['title']}**{platform_tag}")
+                if suggestion.get("url"):
+                    st.markdown(f"[Open link]({suggestion['url']})")
+                st.write(suggestion["text"])
+                st.caption(suggestion["rationale"])
 
-        if verdict != "GOOD" and st.button(f"Go through the content again and retake - {skill}"):
-            reassessment_results.pop(skill, None)
-            suggestions.pop(skill, None)
-            st.session_state.pop(saved_key, None)
-            st.session_state["page"] = "nudges"
-            st.rerun()
-        elif verdict == "GOOD" and st.button(f"Retake anyway - {skill}"):
-            reassessment_results.pop(skill, None)
-            suggestions.pop(skill, None)
-            st.session_state.pop(saved_key, None)
-            st.session_state["page"] = "quiz"
-            st.rerun()
-
-        st.divider()
+            if verdict != "GOOD" and st.button(f"Go through the content again and retake - {skill}"):
+                reassessment_results.pop(skill, None)
+                suggestions.pop(skill, None)
+                st.session_state.pop(saved_key, None)
+                st.session_state["page"] = "nudges"
+                st.rerun()
+            elif verdict == "GOOD" and st.button(f"Retake anyway - {skill}"):
+                reassessment_results.pop(skill, None)
+                suggestions.pop(skill, None)
+                st.session_state.pop(saved_key, None)
+                st.session_state["page"] = "quiz"
+                st.rerun()
