@@ -52,9 +52,23 @@ def inject_custom_css():
         background-color: var(--repsol-cream);
     }
 
+    [data-testid="stHeader"] {
+        background-color: var(--repsol-orange) !important;
+    }
+
     [data-testid="stSidebar"] {
-        background-color: #FFFFFF;
-        border-right: 1px solid rgba(10, 26, 47, 0.08);
+        background-color: var(--repsol-orange) !important;
+        border-right: none;
+    }
+    [data-testid="stSidebar"] * {
+        color: #FFFFFF !important;
+    }
+    [data-testid="stSidebar"] [data-baseweb="radio"] > div:first-child {
+        border-color: #FFFFFF !important;
+        border-width: 2px !important;
+    }
+    [data-testid="stSidebar"] [data-baseweb="radio"] > div:first-child > div {
+        background-color: #FFFFFF !important;
     }
 
     h1, h2, h3 {
