@@ -109,4 +109,17 @@ def _generate_quiz(skill, level, required_level, is_knowledge_gap, content):
         questions = json.loads(match.group(0)) if match else []
     except (ValueError, TypeError):
         questions = []
-    return questions
+    return [q for q in questions if _is_valid_question(q)]
+
+
+def _is_valid_question(q):
+    """Drop anything the LLM returned in the wrong shape — score_questions()
+    assumes every self_report has a full scores array and every
+    knowledge_check has a valid correct index, with no further checking."""
+    if not isinstance(q, dict) or not isinstance(q.get("options"), list) or not q["options"]:
+        return False
+    if q.get("type") == "self_report":
+        return isinstance(q.get("scores"), list) and len(q["scores"]) == len(q["options"])
+    if q.get("type") == "knowledge_check":
+        return isinstance(q.get("correct"), int) and 0 <= q["correct"] < len(q["options"])
+    return False

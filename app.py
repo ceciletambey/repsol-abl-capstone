@@ -21,6 +21,7 @@ load_dotenv()
 
 from assessment.data import CATEGORIES, PD_QUESTIONS, ROLES, build_footprint, evaluate_outcome, score_questions
 from agents.observer import detect_gap
+from agents.suggester import suggest_next
 
 st.set_page_config(page_title="Repsol ABL", page_icon="🎯", layout="centered")
 
@@ -88,7 +89,7 @@ else:
                 note = f"below role requirement"
             st.metric(label, v["level"], note)
     if st.button("Retake assessment"):
-        for key in ["footprint", "delivery_format", "pipeline_results", "show_reassessment", "reassessment_results"]:
+        for key in ["footprint", "delivery_format", "pipeline_results", "show_reassessment", "reassessment_results", "suggestions"]:
             st.session_state.pop(key, None)
         st.rerun()
 
@@ -217,12 +218,30 @@ if st.session_state.get("show_reassessment"):
             else:
                 st.error(f"❌ BAD — {explanation}")
 
+            suggestions = st.session_state.setdefault("suggestions", {})
+            if skill not in suggestions:
+                seen_titles = {i.get("title") for i in result["final_nudge"]["items"] if i.get("title")}
+                with st.spinner("Suggesting what to read next..."):
+                    suggestions[skill] = suggest_next(skill, after, required, verdict, seen_titles)
+            suggestion = suggestions[skill]
+
+            st.markdown("**📚 Suggested next read**")
+            with st.container(border=True):
+                platform_tag = f" · {suggestion['platform']}" if suggestion.get("platform") else ""
+                st.markdown(f"**{suggestion['title']}**{platform_tag}")
+                if suggestion.get("url"):
+                    st.markdown(f"[Open link]({suggestion['url']})")
+                st.write(suggestion["text"])
+                st.caption(suggestion["rationale"])
+
             if verdict != "GOOD" and st.button(f"🔁 Go through the content again & retake — {skill}"):
                 reassessment_results.pop(skill, None)
+                suggestions.pop(skill, None)
                 st.session_state["show_reassessment"] = False
                 st.rerun()
             elif verdict == "GOOD" and st.button(f"🔁 Retake anyway — {skill}"):
                 reassessment_results.pop(skill, None)
+                suggestions.pop(skill, None)
                 st.rerun()
 
         st.divider()

@@ -10,8 +10,10 @@ the progression.
 ## Architecture
 
 ```
-Assessment (HTML)  →  Observer  →  Skill Matcher  →  Retriever  →  Curator  →  Delivery  →  Nudge
-                                   └── self-corrective RAG loop ──┘
+Assessment (HTML)  →  Observer  →  Skill Matcher  →  Retriever  →  Curator  →  Formatter  →  Delivery  →  Evaluator
+                                   └── self-corrective RAG loop ──┘                                                  │
+                                                                                                                       ▼
+                                                                                                          Re-assessment → Suggester
 ```
 
 | Node | Role |
@@ -19,8 +21,11 @@ Assessment (HTML)  →  Observer  →  Skill Matcher  →  Retriever  →  Curat
 | Observer (01) | Reads the assessment JSON, picks the gap to act on |
 | Skill Matcher (02) | Matches gap to Digcomp skills; self-corrective RAG loop |
 | Retriever (03) | Queries Chroma for content, internal-weighted |
-| Curator (04) | Filters/ranks, chooses delivery format |
+| Curator (04) | Filters/ranks, gathers internal + external candidates |
+| Formatter (04b) | Shapes each candidate (course / video / summary) for the delivery format |
 | Delivery (05) | Packages the nudge as a JSON payload |
+| Evaluator (06) | Generates the personalised re-assessment quiz, grounded in the nudge content |
+| Suggester (07) | After the re-assessment verdict, recommends the next thing to read — same level if the verdict wasn't GOOD, next level up if it was |
 
 ## Setup
 
