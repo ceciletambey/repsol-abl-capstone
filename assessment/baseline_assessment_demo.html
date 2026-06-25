@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Repsol — Digital Skills Baseline Assessment</title>
+<title>Repsol - Digital Skills Baseline Assessment</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -128,7 +128,7 @@
     border-bottom: 1px solid var(--bg);
     display: flex; gap: 0.6rem;
   }
-  .info-card ul li::before { content: "—"; color: var(--red); flex-shrink: 0; }
+  .info-card ul li::before { content: "-"; color: var(--red); flex-shrink: 0; }
 
   .pill-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
   .pill {
@@ -612,7 +612,7 @@
   <div class="landing-hero">
     <p class="subtitle">First Login · Baseline Assessment</p>
     <h1>Digital Skills<br><span>Baseline Assessment</span></h1>
-    <p>Before your personalised learning journey begins, we need to understand your current digital skill levels. This assessment takes around 12 minutes and runs once — your results are used immediately to tailor every learning nudge you receive.</p>
+    <p>Before your personalised learning journey begins, we need to understand your current digital skill levels. This assessment takes around 12 minutes and runs once - your results are used immediately to tailor every learning nudge you receive.</p>
   </div>
 
   <div class="landing-body">
@@ -626,8 +626,8 @@
           <li>Plus 5 optional personal development questions at the end</li>
           <li>Each category has 2 self-report questions and 1 knowledge check</li>
           <li>Approximately 15 minutes to complete (core: ~12 min + optional PD: ~3 min)</li>
-          <li>Runs once on first login — never repeated</li>
-          <li>Answer options are not in any obvious order — read each one carefully</li>
+          <li>Runs once on first login - never repeated</li>
+          <li>Answer options are not in any obvious order - read each one carefully</li>
           <li>Your results are passed directly to the Observer agent</li>
         </ul>
         <div class="pill-row">
@@ -647,9 +647,9 @@
         <ul>
           <li>Based on Repsol's Target Skills Matrix and the EU DigComp 2.2 framework</li>
           <li>Categories aligned to Repsol's internal course curriculum (Data & AI, Power BI, Copilot/M365, and more)</li>
-          <li>Hybrid format prevents self-report inflation — knowledge checks verify applied understanding</li>
+          <li>Hybrid format prevents self-report inflation - knowledge checks verify applied understanding</li>
           <li>Output feeds into the Observer agent to personalise your learning nudges from day one</li>
-          <li>Designed as the Evaluator agent's baseline — growth is measured against this starting point</li>
+          <li>Designed as the Evaluator agent's baseline - growth is measured against this starting point</li>
         </ul>
       </div>
     </div>
@@ -691,23 +691,23 @@
       </table>
 
       <div class="rule-box" style="margin-bottom:0.75rem;">
-        <strong>Self-Report questions</strong> — Each option carries a hidden score from 1 to 4 based on the level of skill or experience it describes. Answer options are deliberately not presented in order of proficiency — the system scores your answer based on what it describes, not its position in the list.<br><br>
-        <strong>Knowledge Check questions</strong> — One objectively correct answer exists. <strong>Correct = 3 points. Wrong = 1 point.</strong> This is intentional: getting it right confirms at least intermediate applied knowledge; getting it wrong flags a gap even if you self-reported high confidence.<br><br>
-        <strong>Category score</strong> — Average of all 3 question scores in the category, <strong>rounded down</strong> to the nearest integer (floor). Range: 1–4.
+        <strong>Self-Report questions</strong> - Each option carries a hidden score from 1 to 4 based on the level of skill or experience it describes. Answer options are deliberately not presented in order of proficiency - the system scores your answer based on what it describes, not its position in the list.<br><br>
+        <strong>Knowledge Check questions</strong> - One objectively correct answer exists. <strong>Correct = 3 points. Wrong = 1 point.</strong> This is intentional: getting it right confirms at least intermediate applied knowledge; getting it wrong flags a gap even if you self-reported high confidence.<br><br>
+        <strong>Category score</strong> - Average of all 3 question scores in the category, <strong>rounded down</strong> to the nearest integer (floor). Range: 1–4.
       </div>
 
       <div class="rule-box" style="border-left-color: var(--red);">
-        <strong>Overconfidence cap</strong> — If you answer the knowledge check incorrectly <em>and</em> your self-report average is 3 or above, your category score is capped at 2. This prevents the system placing you at Intermediate or Expert level based solely on self-assessment when your applied knowledge does not match. The Skill Matcher agent receives this as a <strong>knowledge_gap</strong> flag and prioritises a foundational nudge for that category before any other content.
+        <strong>Overconfidence cap</strong> - If you answer the knowledge check incorrectly <em>and</em> your self-report average is 3 or above, your category score is capped at 2. This prevents the system placing you at Intermediate or Expert level based solely on self-assessment when your applied knowledge does not match. The Skill Matcher agent receives this as a <strong>knowledge_gap</strong> flag and prioritises a foundational nudge for that category before any other content.
       </div>
 
       <p style="font-size:0.82rem; color:var(--muted); margin-top:1rem; margin-bottom:0.6rem; font-weight:600; text-transform:uppercase; letter-spacing:0.06em;">Output flags</p>
       <div class="flag-row">
-        <div class="flag-chip red"><span class="dot"></span>immediate_nudge — Final category score = 1</div>
-        <div class="flag-chip orange"><span class="dot"></span>knowledge_gap — KC wrong + self-report avg ≥ 3</div>
+        <div class="flag-chip red"><span class="dot"></span>immediate_nudge - Final category score = 1</div>
+        <div class="flag-chip orange"><span class="dot"></span>knowledge_gap - KC wrong + self-report avg ≥ 3</div>
       </div>
     </div>
 
-    <!-- Role selection — required before starting, drives the Target Skills Matrix -->
+    <!-- Role selection - required before starting, drives the Target Skills Matrix -->
     <div class="info-card full" style="margin-bottom:1.25rem;">
       <h3>Your role</h3>
       <p style="font-size:0.9rem; color:var(--mid); margin-bottom:0.9rem;">
@@ -747,8 +747,8 @@
     <!-- Category questions (steps 1–7) -->
     <div id="cat-step">
       <div class="cat-header">
-        <h2 id="cat-title">—</h2>
-        <p id="cat-desc">—</p>
+        <h2 id="cat-title">-</h2>
+        <p id="cat-desc">-</p>
       </div>
       <div class="questions-card" id="questions-container"></div>
     </div>
@@ -757,12 +757,12 @@
     <div id="pd-step" style="display:none;">
       <div class="pd-header">
         <h2>Personal Development Interests</h2>
-        <p>Beyond your current role requirements — your optional learning ambitions</p>
-        <span class="pd-optional-tag">Optional — you may skip any or all questions</span>
+        <p>Beyond your current role requirements - your optional learning ambitions</p>
+        <span class="pd-optional-tag">Optional - you may skip any or all questions</span>
       </div>
       <div class="pd-card">
         <div class="pd-intro">
-          The previous 7 categories measured the skills required for your role at Repsol. This section is different — it is entirely optional and gives you the freedom to tell the system what <em>you</em> want to learn, regardless of your current job profile. Use it if you are aiming for a promotion, considering a role change, or simply curious about areas beyond your current responsibilities.
+          The previous 7 categories measured the skills required for your role at Repsol. This section is different - it is entirely optional and gives you the freedom to tell the system what <em>you</em> want to learn, regardless of your current job profile. Use it if you are aiming for a promotion, considering a role change, or simply curious about areas beyond your current responsibilities.
         </div>
         <div id="pd-questions-container"></div>
         <p class="pd-skip-note">All questions are optional. Click "Submit Assessment" to proceed at any time.</p>
@@ -778,14 +778,14 @@
   <div class="results-wrap">
     <div class="results-hero">
       <h2>Your Skill Profile</h2>
-      <p>Assessment complete — here is your baseline across all 7 digital skill categories.</p>
+      <p>Assessment complete - here is your baseline across all 7 digital skill categories.</p>
     </div>
 
     <div class="results-grid" id="results-grid"></div>
 
-    <!-- What the Observer would pick, given role + results — overridable -->
+    <!-- What the Observer would pick, given role + results - overridable -->
     <div class="pd-results-box" id="gap-result-box" style="border-left-color: var(--red); display:none;">
-      <h3 style="color:var(--red);">Observer — Skill Gap to Act On</h3>
+      <h3 style="color:var(--red);">Observer - Skill Gap to Act On</h3>
       <div id="gap-result-content"></div>
       <div style="margin-top:1rem;">
         <label style="display:block; font-size:0.85rem; font-weight:600; color:var(--dark); margin-bottom:0.4rem;">
@@ -808,7 +808,7 @@
     <div class="next-steps-box">
       <h3>What happens next?</h3>
       <p>Your skill profile is passed to the <strong style="color:#fff">Observer agent</strong>, which reads your results alongside your digital context (calendar, tasks, activity) to identify skill gaps and prioritise which ones matter most right now.</p>
-      <p>The <strong style="color:#fff">Content Curator</strong> then retrieves the most relevant learning content — internal Repsol courses first, then external sources — matched to those gaps. The <strong style="color:#fff">Formatter</strong> delivers that content to you in the right format for your current context (a quick nudge, an audio clip, or a full course). Finally, the <strong style="color:#fff">Evaluator</strong> creates a personalised assessment based on what you have learned to measure your actual level. The process ends there — your growth is recorded and available in your profile.</p>
+      <p>The <strong style="color:#fff">Content Curator</strong> then retrieves the most relevant learning content - internal Repsol courses first, then external sources - matched to those gaps. The <strong style="color:#fff">Formatter</strong> delivers that content to you in the right format for your current context (a quick nudge, an audio clip, or a full course). Finally, the <strong style="color:#fff">Evaluator</strong> creates a personalised assessment based on what you have learned to measure your actual level. The process ends there - your growth is recorded and available in your profile.</p>
       <div class="agent-pills">
         <span class="a-pill">01 Observer ← your profile lands here</span>
         <span class="a-pill">02 Content Curator</span>
@@ -836,7 +836,7 @@
 
 <!-- ══════════════════════════════════════════════════════════════ DATA & LOGIC -->
 <script>
-// Repsol's Target Skills Matrix (IE ABL Clarificacions brief) — required
+// Repsol's Target Skills Matrix (IE ABL Clarificacions brief) - required
 // level per role, keyed by category id. EXCEL and SAP have no matching
 // assessment category so they're omitted; power_bi has no matrix entry
 // either, so it's never role-gated and stays on the absolute 1-4 scale.
@@ -858,7 +858,7 @@ const CATEGORIES = [
     id: "digcomp",
     label: "General Digital Competency",
     shortLabel: "DigComp",
-    desc: "Foundational digital literacy aligned with the EU DigComp 2.2 framework — the baseline Repsol uses for all employees.",
+    desc: "Foundational digital literacy aligned with the EU DigComp 2.2 framework - the baseline Repsol uses for all employees.",
     questions: [
       {
         type: "self_report",
@@ -887,7 +887,7 @@ const CATEGORIES = [
         text: "What does the term 'digital footprint' mean in a professional context?",
         options: [
           "The storage space used by files on your work computer.",
-          "The trail of data you leave behind through your online activity — websites visited, emails sent, and information shared.",
+          "The trail of data you leave behind through your online activity - websites visited, emails sent, and information shared.",
           "A type of malware that tracks your keyboard input.",
           "The battery consumption of your device during a workday."
         ],
@@ -900,7 +900,7 @@ const CATEGORIES = [
     id: "data",
     label: "Data Literacy",
     shortLabel: "Data Literacy",
-    desc: "Ability to understand, interpret, and work with data — aligned with Repsol's Introduction to Data and AI curriculum.",
+    desc: "Ability to understand, interpret, and work with data - aligned with Repsol's Introduction to Data and AI curriculum.",
     questions: [
       {
         type: "self_report",
@@ -934,7 +934,7 @@ const CATEGORIES = [
           "Exporting a Power BI report to PDF and emailing it to your team."
         ],
         correct: 1,
-        explanation: "Data governance is about defining ownership, access rules, and quality standards for data — ensuring it is trustworthy and used responsibly across the organisation."
+        explanation: "Data governance is about defining ownership, access rules, and quality standards for data - ensuring it is trustworthy and used responsibly across the organisation."
       }
     ]
   },
@@ -976,7 +976,7 @@ const CATEGORIES = [
           "Include your personal login credentials so the AI can access your account data."
         ],
         correct: 2,
-        explanation: "Effective prompting means giving the AI enough context — role, task, format, tone, audience, and constraints — to produce a useful and accurate output. This is the basis of Repsol's 6 Ps prompting method."
+        explanation: "Effective prompting means giving the AI enough context - role, task, format, tone, audience, and constraints - to produce a useful and accurate output. This is the basis of Repsol's 6 Ps prompting method."
       }
     ]
   },
@@ -984,7 +984,7 @@ const CATEGORIES = [
     id: "automation",
     label: "Automation",
     shortLabel: "Automation",
-    desc: "Ability to automate repetitive tasks using digital tools — an extended skill in Repsol's digital competency framework.",
+    desc: "Ability to automate repetitive tasks using digital tools - an extended skill in Repsol's digital competency framework.",
     questions: [
       {
         type: "self_report",
@@ -1026,7 +1026,7 @@ const CATEGORIES = [
     id: "power_bi",
     label: "Data Visualisation (Power BI)",
     shortLabel: "Power BI",
-    desc: "Ability to consume and create reports in Microsoft Power BI — tracked from Consumer level through to Expert in Repsol's curriculum.",
+    desc: "Ability to consume and create reports in Microsoft Power BI - tracked from Consumer level through to Expert in Repsol's curriculum.",
     questions: [
       {
         type: "self_report",
@@ -1054,10 +1054,10 @@ const CATEGORIES = [
         type: "knowledge_check",
         text: "What does DAX stand for, and what is it used for in Power BI?",
         options: [
-          "Digital Analytics Exchange — a protocol for exporting Power BI reports.",
-          "Data Analysis Expressions — a formula language used to create calculated columns, measures, and custom aggregations in Power BI.",
-          "Dashboard and Excel — a feature for importing Excel files into Power BI.",
-          "Data Aggregation Extension — a plug-in that connects Power BI to external databases."
+          "Digital Analytics Exchange - a protocol for exporting Power BI reports.",
+          "Data Analysis Expressions - a formula language used to create calculated columns, measures, and custom aggregations in Power BI.",
+          "Dashboard and Excel - a feature for importing Excel files into Power BI.",
+          "Data Aggregation Extension - a plug-in that connects Power BI to external databases."
         ],
         correct: 1,
         explanation: "DAX (Data Analysis Expressions) is Power BI's formula language. It is used to write measures and calculated columns that go beyond simple drag-and-drop aggregations."
@@ -1068,7 +1068,7 @@ const CATEGORIES = [
     id: "m365",
     label: "Microsoft 365 & Digital Workplace",
     shortLabel: "M365",
-    desc: "Proficiency with the M365 suite (Teams, Outlook, SharePoint, OneDrive, Copilot) — core tools across all Repsol roles.",
+    desc: "Proficiency with the M365 suite (Teams, Outlook, SharePoint, OneDrive, Copilot) - core tools across all Repsol roles.",
     questions: [
       {
         type: "self_report",
@@ -1110,7 +1110,7 @@ const CATEGORIES = [
     id: "cybersecurity",
     label: "Cybersecurity Awareness",
     shortLabel: "Cybersecurity",
-    desc: "Ability to identify and respond to digital security threats — mapped to the CIBER skill in Repsol's Target Skills Matrix.",
+    desc: "Ability to identify and respond to digital security threats - mapped to the CIBER skill in Repsol's Target Skills Matrix.",
     questions: [
       {
         type: "self_report",
@@ -1139,7 +1139,7 @@ const CATEGORIES = [
         text: "What is multi-factor authentication (MFA) and why is it important?",
         options: [
           "Using multiple different web browsers to access company systems, to avoid tracking.",
-          "A security method requiring more than one form of verification (e.g., password + a code sent to your phone) to access an account — making it much harder for attackers to break in even if they steal your password.",
+          "A security method requiring more than one form of verification (e.g., password + a code sent to your phone) to access an account - making it much harder for attackers to break in even if they steal your password.",
           "Having several different passwords saved for the same account as a backup.",
           "An advanced antivirus software automatically installed by the IT department."
         ],
@@ -1173,7 +1173,7 @@ const PD_QUESTIONS = [
     options: [
       "Preparing for a promotion within my current department",
       "Exploring a potential career change to a different function at Repsol",
-      "Personal interest and curiosity — I enjoy learning new technologies",
+      "Personal interest and curiosity - I enjoy learning new technologies",
       "Staying competitive and relevant as the industry evolves"
     ]
   },
@@ -1193,7 +1193,7 @@ const PD_QUESTIONS = [
     type: "single_select",
     text: "Which statement best describes your relationship with digital technology outside of work?",
     options: [
-      "I use only what is needed for daily life — nothing beyond the basics",
+      "I use only what is needed for daily life - nothing beyond the basics",
       "I occasionally try new apps or tools when a friend recommends them",
       "I actively follow tech trends and experiment with new tools regularly",
       "I build, customise, or code digital tools as a personal hobby"
@@ -1267,7 +1267,7 @@ function renderStep() {
     document.getElementById('cat-step').style.display = 'none';
     document.getElementById('pd-step').style.display = 'block';
 
-    document.getElementById('prog-text').textContent = `Step ${TOTAL_STEPS} of ${TOTAL_STEPS} — Optional`;
+    document.getElementById('prog-text').textContent = `Step ${TOTAL_STEPS} of ${TOTAL_STEPS} - Optional`;
     document.getElementById('prog-cat-name').textContent = 'Personal Development';
     document.getElementById('prog-fill').style.width = '100%';
 
@@ -1472,7 +1472,7 @@ function computeScore(catIdx) {
 }
 
 // Mirrors the Observer agent's priority order: being ahead of what your role
-// requires is never a gap, no matter what else is flagged — so a real
+// requires is never a gap, no matter what else is flagged - so a real
 // deficit against the employee's OWN ROLE requirement always comes first.
 // An overconfidence (knowledgeGap) flag only jumps the queue AMONG skills
 // that are already behind; it can't override a skill where the requirement
@@ -1487,10 +1487,10 @@ function detectSkillGap(results, pdAnswers) {
     const worst = pool.reduce((a, b) => (b.requiredLevel - b.final) > (a.requiredLevel - a.final) ? b : a);
     if (flaggedBehind.length) {
       return { skill: worst.label, skillId: worst.id, reason: 'knowledge_gap',
-        text: `${worst.label} is both behind ${selectedRole}'s required level ${worst.requiredLevel} (at ${worst.final}) AND flagged overconfident — confidently wrong about something the job actually needs, so it's prioritised over other deficits.` };
+        text: `${worst.label} is both behind ${selectedRole}'s required level ${worst.requiredLevel} (at ${worst.final}) AND flagged overconfident - confidently wrong about something the job actually needs, so it's prioritised over other deficits.` };
     }
     return { skill: worst.label, skillId: worst.id, reason: 'role_requirement',
-      text: `${selectedRole} requires ${worst.label} level ${worst.requiredLevel}, but they're at level ${worst.final} — the largest gap against this role's actual requirement.` };
+      text: `${selectedRole} requires ${worst.label} level ${worst.requiredLevel}, but they're at level ${worst.final} - the largest gap against this role's actual requirement.` };
   }
 
   // Nobody's behind their role's requirement. A knowledge_gap on a skill
@@ -1507,13 +1507,13 @@ function detectSkillGap(results, pdAnswers) {
     const wanted = entries.find(e => e.id === wantedId);
     if (wanted && wanted.final < 4) {
       return { skill: wanted.label, skillId: wanted.id, reason: 'personal_development',
-        text: `No mandatory gap — honoring their stated personal development priority: ${wanted.label} (currently level ${wanted.final}).` };
+        text: `No mandatory gap - honoring their stated personal development priority: ${wanted.label} (currently level ${wanted.final}).` };
     }
   }
 
   const lowest = entries.reduce((a, b) => (b.final < a.final ? b : a));
   return { skill: lowest.label, skillId: lowest.id, reason: 'lowest_level',
-    text: `No mandatory or role-based gap — ${lowest.label} is their lowest-scoring category (level ${lowest.final}).` };
+    text: `No mandatory or role-based gap - ${lowest.label} is their lowest-scoring category (level ${lowest.final}).` };
 }
 
 function renderResults() {
@@ -1570,14 +1570,14 @@ function renderResults() {
     const item = document.createElement('div');
     item.className = 'kc-review-item';
     item.innerHTML = `
-      <div class="kc-review-cat">${cat.shortLabel} — Knowledge Check ${kcStatus}</div>
+      <div class="kc-review-cat">${cat.shortLabel} - Knowledge Check ${kcStatus}</div>
       <div class="kc-review-q">${kcQ.text}</div>
       <div class="kc-opts">${optsHtml}</div>
       <div class="kc-explain"><strong>Explanation:</strong> ${kcQ.explanation}</div>`;
     kcContent.appendChild(item);
   });
 
-  // ── Detected skill gap (what the Observer would act on) — overridable ──
+  // ── Detected skill gap (what the Observer would act on) - overridable ──
   const gap = detectSkillGap(allResults, pdAnswers);
   document.getElementById('gap-result-box').style.display = 'block';
   document.getElementById('gap-result-content').innerHTML = `

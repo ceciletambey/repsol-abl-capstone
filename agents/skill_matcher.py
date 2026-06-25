@@ -1,10 +1,10 @@
 """
-Agent 02 — The Skill Matcher (Cécile's node).
+Agent 02 - The Skill Matcher (Cécile's node).
 
 The star of the pipeline. Takes the detected gap, retrieves candidate
 learning content, and GRADES it for relevance. If nothing relevant
 survives the filter, it rewrites the query and retries instead of
-recommending irrelevant courses — the self-corrective RAG loop.
+recommending irrelevant courses - the self-corrective RAG loop.
 
 Loop is capped by state["loop_step"] to avoid infinite retries.
 """

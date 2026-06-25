@@ -1,5 +1,5 @@
 """
-Assessment content and scoring — ported from the baseline assessment HTML
+Assessment content and scoring - ported from the baseline assessment HTML
 so the Streamlit app and the Evaluator's generated re-assessment both
 score answers with the exact same rule.
 """
@@ -38,7 +38,7 @@ CATEGORIES = [
                 "text": "What does the term 'digital footprint' mean in a professional context?",
                 "options": [
                     "The storage space used by files on your work computer.",
-                    "The trail of data you leave behind through your online activity — websites visited, emails sent, and information shared.",
+                    "The trail of data you leave behind through your online activity - websites visited, emails sent, and information shared.",
                     "A type of malware that tracks your keyboard input.",
                     "The battery consumption of your device during a workday.",
                 ],
@@ -123,7 +123,7 @@ CATEGORIES = [
                     "Include your personal login credentials so the AI can access your account data.",
                 ],
                 "correct": 2,
-                "explanation": "Effective prompting means giving the AI enough context — this is the basis of Repsol's 6 Ps prompting method.",
+                "explanation": "Effective prompting means giving the AI enough context - this is the basis of Repsol's 6 Ps prompting method.",
             },
         ],
     },
@@ -197,10 +197,10 @@ CATEGORIES = [
                 "type": "knowledge_check",
                 "text": "What does DAX stand for, and what is it used for in Power BI?",
                 "options": [
-                    "Digital Analytics Exchange — a protocol for exporting Power BI reports.",
-                    "Data Analysis Expressions — a formula language used to create calculated columns, measures, and custom aggregations in Power BI.",
-                    "Dashboard and Excel — a feature for importing Excel files into Power BI.",
-                    "Data Aggregation Extension — a plug-in that connects Power BI to external databases.",
+                    "Digital Analytics Exchange - a protocol for exporting Power BI reports.",
+                    "Data Analysis Expressions - a formula language used to create calculated columns, measures, and custom aggregations in Power BI.",
+                    "Dashboard and Excel - a feature for importing Excel files into Power BI.",
+                    "Data Aggregation Extension - a plug-in that connects Power BI to external databases.",
                 ],
                 "correct": 1,
                 "explanation": "DAX (Data Analysis Expressions) is Power BI's formula language.",
@@ -289,7 +289,7 @@ CATEGORIES = [
     },
 ]
 
-# Repsol's Target Skills Matrix (IE ABL Clarificacions PDF) — required level
+# Repsol's Target Skills Matrix (IE ABL Clarificacions PDF) - required level
 # per role, mapped to assessment category ids. EXCEL and SAP have no
 # corresponding assessment category, so they're not represented here; the
 # matrix also defines no target for power_bi, so it stays absolute-scored.
@@ -323,7 +323,7 @@ PD_QUESTIONS = [
         "options": [
             "Preparing for a promotion within my current department",
             "Exploring a potential career change to a different function at Repsol",
-            "Personal interest and curiosity — I enjoy learning new technologies",
+            "Personal interest and curiosity - I enjoy learning new technologies",
             "Staying competitive and relevant as the industry evolves",
         ],
     },
@@ -343,7 +343,7 @@ PD_QUESTIONS = [
         "type": "single_select",
         "text": "Which statement best describes your relationship with digital technology outside of work?",
         "options": [
-            "I use only what is needed for daily life — nothing beyond the basics",
+            "I use only what is needed for daily life - nothing beyond the basics",
             "I occasionally try new apps or tools when a friend recommends them",
             "I actively follow tech trends and experiment with new tools regularly",
             "I build, customise, or code digital tools as a personal hobby",
@@ -391,7 +391,7 @@ def score_questions(questions, answers):
 
 def build_footprint(category_answers, pd_answers, role=None):
     """category_answers: {cat_id: [a0, a1, a2]}. pd_answers: {"pd_areas": [...], "pd_priority_skill": idx|None}.
-    role: a key into ROLES — embeds each category's required_level for that role,
+    role: a key into ROLES - embeds each category's required_level for that role,
     so a gap can be measured against the job's actual requirement, not an
     absolute scale."""
     required = ROLES.get(role, {})
@@ -412,13 +412,13 @@ def build_footprint(category_answers, pd_answers, role=None):
 
 def evaluate_outcome(before, after, required_level, reassessment_result):
     """Judge the re-assessment outcome, not just report the numbers. Success
-    means meeting the role's actual requirement — "improved a bit but still
+    means meeting the role's actual requirement - "improved a bit but still
     below what the job needs" is not a pass."""
     delta = after - before
 
     if reassessment_result["knowledge_gap"]:
         return ("BAD",
-            "Still flagged overconfident on the follow-up knowledge check — claiming "
+            "Still flagged overconfident on the follow-up knowledge check - claiming "
             "more than you can back up. This needs another pass before it counts as resolved.")
 
     if required_level is not None:
@@ -430,10 +430,10 @@ def evaluate_outcome(before, after, required_level, reassessment_result):
                 f"Improved from level {before} to {after}, but still below the required level "
                 f"{required_level}. Keep going on this skill.")
         return ("BAD",
-            f"No improvement — still at level {after}, below the required level {required_level}.")
+            f"No improvement - still at level {after}, below the required level {required_level}.")
 
     if delta > 0:
         return ("GOOD", f"Improved from level {before} to {after}.")
     if delta == 0:
-        return ("NEEDS WORK", f"No change — still at level {after}.")
+        return ("NEEDS WORK", f"No change - still at level {after}.")
     return ("BAD", f"Regressed from level {before} to {after}.")

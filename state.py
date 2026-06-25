@@ -2,7 +2,7 @@
 Shared state for the Repsol ABL pipeline.
 
 This is the CONTRACT every agent reads from and writes to.
-Nodes never talk to each other directly — they read this shared
+Nodes never talk to each other directly - they read this shared
 document and overwrite specific fields. Agree on this file before
 splitting work across the team; changing it mid-build breaks everyone.
 """
@@ -22,7 +22,7 @@ class ABLState(TypedDict):
     candidate_content: List[dict]   # content chunks retrieved from the vector DB
     filtered_content: List[dict]    # chunks that survived relevance grading
     final_nudge: dict               # delivery payload (the "nudge")
-    delivery_format: str            # "text" or "audio" — drives the Formatter
+    delivery_format: str            # "text" or "audio" - drives the Formatter
     reassessment: dict              # Evaluator's personalised follow-up quiz
     loop_step: int                  # caps the self-correct loop (avoid infinite loops)
     messages: Annotated[list, add_messages]

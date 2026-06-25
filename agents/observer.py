@@ -1,8 +1,8 @@
 """
-Agent 01 — The Observer.
+Agent 01 - The Observer.
 
 Reads the JSON exported by the baseline assessment (the only signal this
-project has — no Copilot Studio / M365 footprint access) and identifies
+project has - no Copilot Studio / M365 footprint access) and identifies
 which skill gap to act on.
 """
 
@@ -20,7 +20,7 @@ PD_PRIORITY_TO_SKILL = {
 
 
 def detect_all_gaps(data):
-    """Every skill currently behind its role's required level — not just the
+    """Every skill currently behind its role's required level - not just the
     single biggest one. Used to pre-select all real gaps for training,
     leaving personal-development add-ons as the employee's own choice."""
     return [
@@ -31,7 +31,7 @@ def detect_all_gaps(data):
 
 def detect_gap(data, pd):
     """Pick which skill to act on. Being ahead of what your role requires is
-    never a gap, no matter what else is flagged — so a real deficit against
+    never a gap, no matter what else is flagged - so a real deficit against
     the employee's OWN ROLE requirement always comes first. An overconfidence
     flag only jumps the queue among skills that are ALREADY behind (confidently
     wrong about something your job needs is worse than just still learning
@@ -67,7 +67,7 @@ def observer_node(state):
     data = json.loads(footprint)
     pd = data.pop("personal_development", {})
 
-    # Let the employee directly choose their focus skill if they want to —
+    # Let the employee directly choose their focus skill if they want to -
     # the automatic detection below is a default, not a mandate.
     chosen = state.get("chosen_skill")
     if chosen and chosen in data:

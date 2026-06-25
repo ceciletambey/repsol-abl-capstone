@@ -1,5 +1,5 @@
 """
-Agent 03 — The Retriever.
+Agent 03 - The Retriever.
 
 Queries the Chroma vector store for learning content matching the skill gap.
 Repsol's brief requires INTERNAL content ranked before external, so we fetch
@@ -36,7 +36,7 @@ def retriever_node(state):
         chunks.sort(key=lambda c: 0 if c["source"] == "internal" else 1)
 
     except Exception:
-        # Vector store not built yet — stub so the pipeline still runs.
+        # Vector store not built yet - stub so the pipeline still runs.
         chunks = [
             {"text": f"[stub] internal course matching: {query}", "source": "internal"},
             {"text": f"[stub] external article matching: {query}", "source": "external"},

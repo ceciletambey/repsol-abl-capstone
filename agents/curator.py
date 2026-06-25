@@ -1,12 +1,12 @@
 """
-Agent 04 — The Curator.
+Agent 04 - The Curator.
 
 Assembles learning content for the detected skill gap: Repsol's own course
 catalog first (static data below, taken directly from Repsol's Target
 Skills Matrix brief), then fresh external web content (articles, videos,
 courses, via Tavily search) to fill any gap the catalog doesn't cover.
 
-No connection to Microsoft Copilot Studio or the M365 platform anywhere —
+No connection to Microsoft Copilot Studio or the M365 platform anywhere -
 per the project brief, this system replaces those tools, it doesn't call
 them. Tavily is a plain public-web search API.
 
@@ -20,7 +20,7 @@ EXTERNAL_RESULTS = 5
 
 # Repsol's real internal course catalog, by detected_skill id, taken from
 # the Target Skills Matrix brief. No course exists yet for "digcomp",
-# "automation", or "cybersecurity" — those rely entirely on external search.
+# "automation", or "cybersecurity" - those rely entirely on external search.
 REPSOL_COURSES = {
     "data": [
         {"title": "Introduction to Data and AI", "level": 1, "duration_hours": 2,
@@ -101,7 +101,7 @@ def _search_external(query):
 
         client = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])
     except Exception:
-        # No Tavily key / package / network — stub so the pipeline still runs.
+        # No Tavily key / package / network - stub so the pipeline still runs.
         return [{
             "text": f"[stub] external content matching: {query}",
             "source": "external",
@@ -124,7 +124,7 @@ def _search_external(query):
             continue
 
     if not found:
-        # Neither targeted search turned up anything — fall back to a
+        # Neither targeted search turned up anything - fall back to a
         # generic web search so there's still external content.
         try:
             results = client.search(query=query, max_results=EXTERNAL_RESULTS)

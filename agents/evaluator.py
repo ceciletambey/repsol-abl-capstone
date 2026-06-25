@@ -1,10 +1,10 @@
 """
-Agent 06 — The Evaluator.
+Agent 06 - The Evaluator.
 
 Generates the second assessment: a longer follow-up quiz for the ONE
 skill the employee worked on, calibrated to their starting level and
 grounded in EVERY piece of content the Curator/Formatter gathered (the
-Repsol course, the YouTube video, the Coursera course — not just one of
+Repsol course, the YouTube video, the Coursera course - not just one of
 them). Smart in the sense that it depends entirely on three things per
 employee: which skill, what level they started at (and what their role
 actually requires), and what they were actually given to learn from. This
@@ -61,7 +61,7 @@ def _generate_quiz(skill, level, required_level, is_knowledge_gap, content):
         goal = (
             "They previously claimed confidence but failed a knowledge check, so "
             "the goal now is to verify their FOUNDATIONAL understanding is solid "
-            "— don't test advanced material they weren't given."
+            "- don't test advanced material they weren't given."
         )
     elif required_level:
         goal = (
@@ -80,11 +80,11 @@ def _generate_quiz(skill, level, required_level, is_knowledge_gap, content):
 
     prompt = (
         f"An employee has a skill gap in '{skill}'. {goal}\n\n"
-        f"They were just given ALL of the following learning sources — a "
+        f"They were just given ALL of the following learning sources - a "
         f"thorough follow-up should draw on each of them, not just one:\n\n{content}\n\n"
         f"Write a follow-up assessment of exactly {NUM_QUESTIONS} questions "
         "that can ONLY be answered well by someone who actually engaged with "
-        "THIS material — not generic trivia about the topic. Spread the "
+        "THIS material - not generic trivia about the topic. Spread the "
         "questions across the different sources above where possible.\n\n"
         "2 questions must be type 'self_report': about applying this specific "
         "skill now, 4 options in random order (not sorted by competency), and "
@@ -113,7 +113,7 @@ def _generate_quiz(skill, level, required_level, is_knowledge_gap, content):
 
 
 def _is_valid_question(q):
-    """Drop anything the LLM returned in the wrong shape — score_questions()
+    """Drop anything the LLM returned in the wrong shape - score_questions()
     assumes every self_report has a full scores array and every
     knowledge_check has a valid correct index, with no further checking."""
     if not isinstance(q, dict) or not isinstance(q.get("options"), list) or not q["options"]:

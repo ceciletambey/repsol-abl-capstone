@@ -4,7 +4,7 @@ Persistent memory layer for the Repsol ABL app.
 Stores each completed learning cycle (baseline -> nudge -> re-assessment) in
 a local SQLite database so an employee's skill progression survives page
 refreshes and can be plotted over time in "My Progress". This module is
-additive only — it never touches `ABLState`, the `graph/` pipeline, or
+additive only - it never touches `ABLState`, the `graph/` pipeline, or
 `agents/`; it just persists numbers `app.py` already computes.
 """
 

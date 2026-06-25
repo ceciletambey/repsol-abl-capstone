@@ -1,4 +1,4 @@
-# Repsol ABL — Agentic Based Learning
+# Repsol ABL - Agentic Based Learning
 
 A LangGraph + Gemini + Chroma pipeline that turns a digital-skills gap into a
 targeted learning "nudge." Built for the IE × Repsol capstone.
@@ -25,7 +25,7 @@ Assessment (HTML)  →  Observer  →  Skill Matcher  →  Retriever  →  Curat
 | Formatter (04b) | Shapes each candidate (course / video / summary) for the delivery format |
 | Delivery (05) | Packages the nudge as a JSON payload |
 | Evaluator (06) | Generates the personalised re-assessment quiz, grounded in the nudge content |
-| Suggester (07) | After the re-assessment verdict, recommends the next thing to read — same level if the verdict wasn't GOOD, next level up if it was |
+| Suggester (07) | After the re-assessment verdict, recommends the next thing to read - same level if the verdict wasn't GOOD, next level up if it was |
 
 ## Setup
 
@@ -64,28 +64,28 @@ Deploy a public link:
    ```
 4. Deploy. You get a public URL like the Smart Scheduler one.
 
-Never put the real key in the repo — Streamlit Cloud injects it from Secrets.
+Never put the real key in the repo - Streamlit Cloud injects it from Secrets.
 
 ## Run (pipeline only, no UI)
 
-The pipeline runs even before the vector store is built — the Retriever falls
-back to stubs — so you can test wiring first and add real content later.
+The pipeline runs even before the vector store is built - the Retriever falls
+back to stubs - so you can test wiring first and add real content later.
 
 ## Team task split
 
-Build your node against the frozen `ABLState` in `state.py` — don't change that file
+Build your node against the frozen `ABLState` in `state.py` - don't change that file
 without telling everyone. Each person works on a branch and opens a PR.
 
-- **Observer** — `agents/observer.py` (done, reference example)
-- **Skill Matcher + self-corrective loop** — `agents/skill_matcher.py` ← Cécile
-- **Retriever + Chroma ingestion** — `agents/retriever.py`, `ingestion/build_vectorstore.py`
-- **Curator** — `agents/curator.py`
-- **Supervisor + Delivery + graph wiring** — `graph/build_graph.py`, `agents/delivery.py`
+- **Observer** - `agents/observer.py` (done, reference example)
+- **Skill Matcher + self-corrective loop** - `agents/skill_matcher.py` ← Cécile
+- **Retriever + Chroma ingestion** - `agents/retriever.py`, `ingestion/build_vectorstore.py`
+- **Curator** - `agents/curator.py`
+- **Supervisor + Delivery + graph wiring** - `graph/build_graph.py`, `agents/delivery.py`
 
 ## Notes
 
 - Never commit `.env` or the `chroma_db/` folder (both gitignored). Commit the
-  ingestion *script*, not the built vector store — teammates rebuild it locally.
+  ingestion *script*, not the built vector store - teammates rebuild it locally.
 - `temperature=0` across all agents keeps demo runs reproducible.
 - The Microsoft tools in the Repsol brief are what we *replace*, not a dependency.
 

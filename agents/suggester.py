@@ -1,11 +1,11 @@
 """
-Agent 07 — The Suggester.
+Agent 07 - The Suggester.
 
 Runs once the Evaluator's re-assessment has a verdict. Recommends the ONE
 next piece of content worth reading: the same level's gap-closer if the
 verdict wasn't GOOD, or the next level up if it was. Checks Repsol's own
 catalog first, same as the Curator, then falls back to a fresh web search
-for an article — and never re-suggests a title the employee already saw.
+for an article - and never re-suggests a title the employee already saw.
 """
 
 import os

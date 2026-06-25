@@ -15,7 +15,7 @@ pip install -r requirements.txt -q
 echo "→ Preparing .env..."
 if [ ! -f .env ]; then
   cp .env.example .env
-  echo "  Created .env — now paste your real GOOGLE_API_KEY into it."
+  echo "  Created .env - now paste your real GOOGLE_API_KEY into it."
 else
   echo "  .env already exists, leaving it untouched."
 fi

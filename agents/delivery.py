@@ -1,7 +1,7 @@
 """
-Agent 05 — Delivery.
+Agent 05 - Delivery.
 
-Packages ALL of the curated, formatted content into the final "nudge" — a
+Packages ALL of the curated, formatted content into the final "nudge" - a
 structured JSON payload ready to be pushed to Teams/email in a real
 deployment. Carries every item (Repsol course, YouTube video, Coursera
 course, ...) the Formatter shaped, not just one.

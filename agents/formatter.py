@@ -1,12 +1,12 @@
 """
-Agent 04b — The Formatter.
+Agent 04b - The Formatter.
 
-Sits between the Curator (gathers 2-3 candidates — a Repsol course, a
+Sits between the Curator (gathers 2-3 candidates - a Repsol course, a
 YouTube video, a Coursera course, whatever turns up) and Delivery
 (packages the final payload). Shapes EVERY candidate for its own content
-type — a Repsol course becomes a "take this course" pointer, a YouTube
+type - a Repsol course becomes a "take this course" pointer, a YouTube
 result becomes a "watch this video" pointer, anything else gets a short
-text/audio summary — rather than narrowing down to a single "best" pick.
+text/audio summary - rather than narrowing down to a single "best" pick.
 The employee sees all of them.
 """
 
@@ -42,7 +42,7 @@ def _shape(chosen, presentation, delivery_format):
     elif presentation == "watch":
         title = chosen.get("title") or "this video"
         url = chosen.get("url", "")
-        chosen["text"] = f'Watch "{title}" — {url}' if url else title
+        chosen["text"] = f'Watch "{title}" - {url}' if url else title
         chosen["format"] = "watch this video"
     else:
         raw = chosen.get("text", "")
