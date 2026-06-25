@@ -19,6 +19,16 @@ PD_PRIORITY_TO_SKILL = {
 }
 
 
+def detect_all_gaps(data):
+    """Every skill currently behind its role's required level — not just the
+    single biggest one. Used to pre-select all real gaps for training,
+    leaving personal-development add-ons as the employee's own choice."""
+    return [
+        s for s, v in data.items()
+        if "required_level" in v and v["required_level"] - v.get("level", 0) > 0
+    ]
+
+
 def detect_gap(data, pd):
     """Pick which skill to act on. Being ahead of what your role requires is
     never a gap, no matter what else is flagged — so a real deficit against
