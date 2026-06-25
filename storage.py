@@ -8,6 +8,7 @@ additive only — it never touches `ABLState`, the `graph/` pipeline, or
 `agents/`; it just persists numbers `app.py` already computes.
 """
 
+import json
 import sqlite3
 from contextlib import contextmanager
 from datetime import date, timedelta
@@ -33,7 +34,7 @@ def _connect():
 
 
 def init_db():
-    """Create the learning_cycles table if it doesn't exist yet."""
+    """Create the learning_cycles and employee_profiles tables if they don't exist yet."""
     try:
         with _connect() as conn:
             conn.execute("""
@@ -49,8 +50,53 @@ def init_db():
                     created_at TEXT NOT NULL DEFAULT (date('now'))
                 )
             """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS employee_profiles (
+                    employee TEXT PRIMARY KEY,
+                    role TEXT,
+                    footprint TEXT NOT NULL,
+                    updated_at TEXT NOT NULL DEFAULT (date('now'))
+                )
+            """)
     except sqlite3.Error as e:
         print(f"[storage] Failed to initialise database: {e}")
+
+
+def save_profile(employee, role, footprint):
+    """Upsert an employee's latest baseline footprint, so picking the same
+    employee again restores their role and skill levels instead of forcing
+    them to retake the whole baseline assessment from scratch."""
+    try:
+        with _connect() as conn:
+            conn.execute(
+                """INSERT INTO employee_profiles (employee, role, footprint, updated_at)
+                   VALUES (?, ?, ?, date('now'))
+                   ON CONFLICT(employee) DO UPDATE SET
+                       role = excluded.role,
+                       footprint = excluded.footprint,
+                       updated_at = excluded.updated_at""",
+                (employee, role, json.dumps(footprint)),
+            )
+    except sqlite3.Error as e:
+        print(f"[storage] Failed to save profile for {employee}: {e}")
+
+
+def get_profile(employee):
+    """The employee's latest saved {role, footprint}, or None if they've never
+    submitted a baseline assessment before."""
+    try:
+        with _connect() as conn:
+            row = conn.execute(
+                "SELECT role, footprint FROM employee_profiles WHERE employee = ?",
+                (employee,),
+            ).fetchone()
+            if row is None:
+                return None
+            role, footprint_json = row
+            return {"role": role, "footprint": json.loads(footprint_json)}
+    except sqlite3.Error as e:
+        print(f"[storage] Failed to read profile for {employee}: {e}")
+        return None
 
 
 def save_cycle(employee, role, skill, before_level, after_level, required_level, verdict, created_at=None):
@@ -87,12 +133,17 @@ def get_history(employee):
 
 
 def list_employees():
-    """Distinct employee names/IDs that have at least one stored cycle."""
+    """Distinct employee names/IDs that have a saved profile and/or at least
+    one stored cycle (covers someone who's done the baseline but not yet
+    finished a re-assessment)."""
     try:
         with _connect() as conn:
-            rows = conn.execute(
-                "SELECT DISTINCT employee FROM learning_cycles ORDER BY employee ASC"
-            ).fetchall()
+            rows = conn.execute("""
+                SELECT employee FROM employee_profiles
+                UNION
+                SELECT employee FROM learning_cycles
+                ORDER BY employee ASC
+            """).fetchall()
             return [row[0] for row in rows]
     except sqlite3.Error as e:
         print(f"[storage] Failed to list employees: {e}")

@@ -20,11 +20,182 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from assessment.data import CATEGORIES, PD_QUESTIONS, ROLES, build_footprint, evaluate_outcome, score_questions
+from assessment.data import (CATEGORIES, PD_PRIORITY_IDS, PD_QUESTIONS, ROLES, build_footprint,
+                              evaluate_outcome, score_questions)
 from agents.observer import detect_gap
 import storage
 
-st.set_page_config(page_title="Repsol ABL", page_icon="🎯", layout="centered")
+st.set_page_config(page_title="Repsol ABL", page_icon="🟠", layout="centered")
+
+
+def inject_custom_css():
+    """All Repsol branding lives here — tweak the hex values in :root to retheme."""
+    st.markdown("""
+    <style>
+    :root {
+        --repsol-navy: #0A1A2F;
+        --repsol-orange: #FF8200;
+        --repsol-orange-hover: #E37300;
+        --repsol-cream: #FDF6F0;
+        --repsol-teal: #19A7C0;
+        --repsol-gradient: linear-gradient(90deg, #FFC629 0%, #FF6B1A 50%, #ED2E5C 100%);
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap');
+
+    html, body, [data-testid="stAppViewContainer"], [data-testid="stSidebar"] {
+        font-family: 'Manrope', sans-serif;
+    }
+
+    [data-testid="stAppViewContainer"] {
+        background-color: var(--repsol-cream);
+    }
+
+    [data-testid="stSidebar"] {
+        background-color: #FFFFFF;
+        border-right: 1px solid rgba(10, 26, 47, 0.08);
+    }
+
+    h1, h2, h3 {
+        color: var(--repsol-navy) !important;
+        font-weight: 800 !important;
+        letter-spacing: -0.01em;
+    }
+
+    [data-testid="stCaptionContainer"] {
+        color: rgba(10, 26, 47, 0.65) !important;
+    }
+
+    /* Primary action buttons */
+    button[kind="primary"],
+    [data-testid^="stBaseButton-primary"] {
+        background-color: var(--repsol-orange) !important;
+        color: #FFFFFF !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 700 !important;
+        transition: background-color 0.15s ease-in-out;
+    }
+    button[kind="primary"]:hover,
+    [data-testid^="stBaseButton-primary"]:hover {
+        background-color: var(--repsol-orange-hover) !important;
+        color: #FFFFFF !important;
+    }
+
+    /* Secondary buttons — quiet navy outline so primary actions still pop */
+    button[kind="secondary"],
+    [data-testid^="stBaseButton-secondary"] {
+        border-radius: 8px !important;
+        border-color: rgba(10, 26, 47, 0.25) !important;
+        color: var(--repsol-navy) !important;
+    }
+
+    /* Nudge cards (st.container(border=True)) — flagged via a marker div so the
+       rule doesn't accidentally catch every other vertical block on the page */
+    div[data-testid="stVerticalBlock"]:has(> div.repsol-card-marker),
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(div.repsol-card-marker) {
+        background-color: #FFFFFF !important;
+        border-radius: 12px !important;
+        border: 1px solid rgba(10, 26, 47, 0.06) !important;
+        border-left: 4px solid var(--repsol-orange) !important;
+        box-shadow: 0 2px 10px rgba(10, 26, 47, 0.08) !important;
+        padding: 0.5rem 1rem !important;
+    }
+
+    /* Metrics */
+    [data-testid="stMetricValue"] {
+        color: var(--repsol-navy) !important;
+        font-weight: 800 !important;
+    }
+    [data-testid="stMetricLabel"] {
+        color: var(--repsol-teal) !important;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: 0.78rem !important;
+        font-weight: 700 !important;
+    }
+
+    /* Tables */
+    [data-testid="stTable"] table {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    /* Alerts — keep semantic colors, just round the corners for consistency */
+    [data-testid="stAlertContainer"] {
+        border-radius: 10px !important;
+    }
+
+    /* Header band */
+    .repsol-header-band {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0 0.25rem 0;
+    }
+    .repsol-wordmark {
+        font-family: 'Manrope', sans-serif;
+        font-weight: 800;
+        font-size: 2rem;
+        color: var(--repsol-navy);
+        letter-spacing: -0.02em;
+        display: flex;
+        align-items: center;
+    }
+    .repsol-dot {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--repsol-gradient);
+        margin-right: 10px;
+    }
+    .repsol-gradient-shape {
+        width: 130px;
+        height: 42px;
+        border-radius: 21px;
+        background: var(--repsol-gradient);
+        opacity: 0.9;
+    }
+    .repsol-gradient-bar {
+        height: 5px;
+        width: 100%;
+        border-radius: 4px;
+        background: var(--repsol-gradient);
+        margin: 0.25rem 0 1.25rem 0;
+    }
+
+    /* Teal sub-labels used for skill names in My Progress */
+    .repsol-sublabel {
+        color: var(--repsol-teal);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-size: 0.85rem;
+        margin-bottom: 0.2rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+
+def render_repsol_header():
+    """Recreated 'repsol' wordmark — pure CSS/SVG, no external image, so there's
+    nothing trademarked to clear before a real demo.
+
+    To swap in an official logo later, replace the st.markdown call below with:
+        st.image("assets/repsol_logo.png", width=180)
+    """
+    st.markdown("""
+    <div class="repsol-header-band">
+        <div class="repsol-wordmark"><span class="repsol-dot"></span>repsol</div>
+        <div class="repsol-gradient-shape"></div>
+    </div>
+    <div class="repsol-gradient-bar"></div>
+    """, unsafe_allow_html=True)
+
+
+inject_custom_css()
+render_repsol_header()
 
 storage.seed_demo_employee()
 
@@ -62,11 +233,12 @@ if view == "📈 My Progress":
     df = df.sort_values("created_at")
 
     st.subheader("Level over time, per skill")
-    for skill in sorted(df["skill"].unique()):
+    brand_palette = ["#FF8200", "#19A7C0", "#ED2E5C", "#FFC629"]
+    for i, skill in enumerate(sorted(df["skill"].unique())):
         skill_df = df[df["skill"] == skill]
-        st.markdown(f"**{skill}**")
+        st.markdown(f'<p class="repsol-sublabel">{skill}</p>', unsafe_allow_html=True)
         chart_df = skill_df.set_index("created_at")[["after_level"]].rename(columns={"after_level": "level"})
-        st.line_chart(chart_df)
+        st.line_chart(chart_df, color=brand_palette[i % len(brand_palette)])
 
     st.subheader("Current level vs. required level")
     latest = df.groupby("skill", as_index=False).tail(1)
@@ -91,18 +263,44 @@ employee_choice = st.selectbox(
     ["— Select —", "+ New employee"] + existing_employees,
     index=0,
 )
+selected_employee = None
 if employee_choice == "+ New employee":
     new_employee = st.text_input("Enter new employee name or ID")
     if new_employee.strip():
-        st.session_state["employee"] = new_employee.strip()
+        selected_employee = new_employee.strip()
 elif employee_choice != "— Select —":
-    st.session_state["employee"] = employee_choice
+    selected_employee = employee_choice
 
-if not st.session_state.get("employee"):
+if not selected_employee:
     st.info("Select or create an employee to continue.")
     st.stop()
 
-st.success(f"Working as: **{st.session_state['employee']}**")
+# Switching to a different employee on the same page must not leak the
+# previous one's footprint/pipeline/re-assessment state — wipe everything
+# scoped to a single employee before adopting the new one.
+if st.session_state.get("employee") != selected_employee:
+    for key in ["footprint", "role", "delivery_format", "pipeline_results",
+                "show_reassessment", "reassessment_results", "profile_loaded_for"]:
+        st.session_state.pop(key, None)
+    for key in [k for k in st.session_state if k.startswith("cycle_saved_")]:
+        st.session_state.pop(key, None)
+    st.session_state["employee"] = selected_employee
+
+employee = st.session_state["employee"]
+st.success(f"Working as: **{employee}**")
+
+# Restore a returning employee's last saved role + footprint once per session,
+# so they land on "Assessment submitted" instead of retaking the whole quiz.
+# "Retake assessment" (below) still works: it clears footprint/role, and this
+# check doesn't fire again for the same employee since profile_loaded_for is
+# already set, so the blank form is shown as normal.
+if st.session_state.get("profile_loaded_for") != employee:
+    if "footprint" not in st.session_state:
+        profile = storage.get_profile(employee)
+        if profile:
+            st.session_state["footprint"] = profile["footprint"]
+            st.session_state["role"] = profile["role"]
+    st.session_state["profile_loaded_for"] = employee
 
 # ============ STEP 1: REAL BASELINE ASSESSMENT ============
 st.header("1 · Baseline assessment")
@@ -147,13 +345,15 @@ if "footprint" not in st.session_state:
             elif missing:
                 st.error(f"Please answer every question — missing: {', '.join(missing)}")
             else:
-                st.session_state["footprint"] = build_footprint(category_answers, pd_answers, role=role)
+                footprint = build_footprint(category_answers, pd_answers, role=role)
+                st.session_state["footprint"] = footprint
                 st.session_state["role"] = role
                 st.session_state["delivery_format"] = fmt
+                storage.save_profile(employee, role, footprint)
                 st.rerun()
 else:
     footprint = st.session_state["footprint"]
-    st.success("Assessment submitted.")
+    st.success("Baseline assessment on file — no need to retake it.")
     cols = st.columns(4)
     for i, (skill, v) in enumerate(footprint.items()):
         if skill == "personal_development":
@@ -164,7 +364,43 @@ else:
             if note is None and "required_level" in v and v["level"] < v["required_level"]:
                 note = f"below role requirement"
             st.metric(label, v["level"], note)
-    if st.button("Retake assessment"):
+
+    # Returning employees skip the baseline quiz, but can still update what
+    # they want to develop next — the one part of the assessment that's
+    # expected to change between cycles even though their role/level didn't.
+    with st.expander("✏️ Update personal development priorities"):
+        with st.form("pd_update_form"):
+            pd_answers = {}
+            for q in PD_QUESTIONS:
+                if q["type"] == "multi_select":
+                    sel = st.multiselect(q["text"], range(len(q["options"])),
+                                          format_func=lambda i, q=q: q["options"][i], key=f"pd_update_{q['id']}")
+                    pd_answers[q["id"]] = sel
+                else:
+                    idx = st.radio(q["text"], range(len(q["options"])),
+                                    format_func=lambda i, q=q: q["options"][i],
+                                    key=f"pd_update_{q['id']}", index=None)
+                    pd_answers[q["id"]] = idx
+            pd_submitted = st.form_submit_button("Save personal development update")
+
+            if pd_submitted:
+                priority_idx = pd_answers.get("pd_priority_skill")
+                if priority_idx is not None:
+                    footprint["personal_development"] = {"priority_skill": PD_PRIORITY_IDS[priority_idx]}
+                    st.session_state["footprint"] = footprint
+                    storage.save_profile(employee, st.session_state.get("role"), footprint)
+                    st.success("Personal development priorities updated.")
+                    st.rerun()
+                else:
+                    st.error("Please select your top development priority.")
+
+    st.session_state.setdefault("delivery_format", "text")
+    st.session_state["delivery_format"] = st.radio(
+        "Delivery format for the nudge", ["text", "audio"], horizontal=True,
+        index=["text", "audio"].index(st.session_state["delivery_format"]),
+    )
+
+    if st.button("Retake full baseline assessment"):
         for key in ["footprint", "role", "delivery_format", "pipeline_results", "show_reassessment", "reassessment_results"]:
             st.session_state.pop(key, None)
         for key in [k for k in st.session_state if k.startswith("cycle_saved_")]:
@@ -227,6 +463,7 @@ if "pipeline_results" in st.session_state and not st.session_state.get("show_rea
         st.caption(f"{len(nudge['items'])} source(s) gathered for this skill.")
         for item in nudge["items"]:
             with st.container(border=True):
+                st.markdown('<div class="repsol-card-marker"></div>', unsafe_allow_html=True)
                 st.markdown(f"**{item.get('title') or item['source']}**  \n"
                             f"Source: {item['source']} · Format: {item['format']}")
                 if item.get("url"):
