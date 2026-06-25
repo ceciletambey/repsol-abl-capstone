@@ -258,18 +258,27 @@ if view == "📈 My Progress":
 st.header("0 · Who are you?")
 
 existing_employees = storage.list_employees()
+employee_options = ["— Select —", "+ New employee"] + existing_employees
+current_employee = st.session_state.get("employee")
+default_employee_idx = employee_options.index(current_employee) if current_employee in employee_options else 0
 employee_choice = st.selectbox(
     "Employee name or ID",
-    ["— Select —", "+ New employee"] + existing_employees,
-    index=0,
+    employee_options,
+    index=default_employee_idx,
+    key="employee_choice",
 )
 selected_employee = None
 if employee_choice == "+ New employee":
-    new_employee = st.text_input("Enter new employee name or ID")
+    new_employee = st.text_input("Enter new employee name or ID", key="new_employee_input")
     if new_employee.strip():
         selected_employee = new_employee.strip()
 elif employee_choice != "— Select —":
     selected_employee = employee_choice
+
+# Fall back to the already-confirmed employee if the widget reports a blank
+# selection on this rerun (e.g. right after a brand-new profile gets saved
+# and the dropdown's option list changes) — don't force a re-pick.
+selected_employee = selected_employee or current_employee
 
 if not selected_employee:
     st.info("Select or create an employee to continue.")
