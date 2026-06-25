@@ -38,6 +38,7 @@ def inject_custom_css():
         --repsol-orange: #FF8200;
         --repsol-orange-hover: #E37300;
         --repsol-cream: #FDF6F0;
+        --repsol-pastel: #FCE4CB;
         --repsol-teal: #19A7C0;
         --repsol-gradient: linear-gradient(90deg, #FFC629 0%, #FF6B1A 50%, #ED2E5C 100%);
     }
@@ -48,27 +49,14 @@ def inject_custom_css():
         font-family: 'Manrope', sans-serif;
     }
 
-    [data-testid="stAppViewContainer"] {
-        background-color: var(--repsol-cream);
-    }
-
-    [data-testid="stHeader"] {
-        background-color: var(--repsol-orange) !important;
+    [data-testid="stAppViewContainer"],
+    [data-testid="stHeader"],
+    [data-testid="stSidebar"] {
+        background-color: var(--repsol-pastel) !important;
     }
 
     [data-testid="stSidebar"] {
-        background-color: var(--repsol-orange) !important;
-        border-right: none;
-    }
-    [data-testid="stSidebar"] * {
-        color: #FFFFFF !important;
-    }
-    [data-testid="stSidebar"] [data-baseweb="radio"] > div:first-child {
-        border-color: #FFFFFF !important;
-        border-width: 2px !important;
-    }
-    [data-testid="stSidebar"] [data-baseweb="radio"] > div:first-child > div {
-        background-color: #FFFFFF !important;
+        border-right: 1px solid rgba(10, 26, 47, 0.08);
     }
 
     h1, h2, h3 {
