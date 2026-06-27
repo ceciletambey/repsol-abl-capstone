@@ -235,6 +235,20 @@ if view == "My Progress":
     df["created_at"] = pd.to_datetime(df["created_at"])
     df = df.sort_values("created_at")
 
+    # ============ KPI HEADLINE ============
+    latest = df.groupby("skill", as_index=False).tail(1)
+    required = latest.dropna(subset=["required_level"])
+    skills_met = int((required["after_level"] >= required["required_level"]).sum())
+    avg_level = df["after_level"].mean()
+    graded = df[df["verdict"].notna() & (df["verdict"] != "")]
+    good_rate = (graded["verdict"] == "GOOD").mean() if not graded.empty else None
+
+    k1, k2, k3, k4 = st.columns(4)
+    k1.metric("Skills on target", f"{skills_met}/{len(required)}" if len(required) else "-")
+    k2.metric("Average level", f"{avg_level:.1f}")
+    k3.metric("Cycles passed (GOOD)", f"{good_rate * 100:.0f}%" if good_rate is not None else "-")
+    k4.metric("Cycles completed", len(history))
+
     st.subheader("Level over time, per skill")
     st.caption("The red line, where shown, is the role's required level for that skill - the target to reach.")
     brand_palette = ["#FF8200", "#19A7C0", "#ED2E5C", "#FFC629"]
@@ -250,7 +264,6 @@ if view == "My Progress":
         st.line_chart(chart_df, color=colors)
 
     st.subheader("Current level vs. required level")
-    latest = df.groupby("skill", as_index=False).tail(1)
     summary = pd.DataFrame({
         "Skill": latest["skill"],
         "Current level": latest["after_level"],
