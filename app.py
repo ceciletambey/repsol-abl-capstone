@@ -251,7 +251,8 @@ if view == "My Progress":
 
     st.subheader("Level over time, per skill")
     st.caption("The red line, where shown, is the role's required level for that skill - the target to reach.")
-    brand_palette = ["#FF8200", "#19A7C0", "#ED2E5C", "#FFC629"]
+    # "B3" suffix = ~70% opacity, so lines read softer against the cream background.
+    brand_palette = ["#FF8200B3", "#19A7C0B3", "#ED2E5CB3", "#FFC629B3"]
     for i, skill in enumerate(sorted(df["skill"].unique())):
         skill_df = df[df["skill"] == skill]
         st.markdown(f'<p class="repsol-sublabel">{skill}</p>', unsafe_allow_html=True)
@@ -260,7 +261,7 @@ if view == "My Progress":
         required = skill_df["required_level"].dropna()
         if not required.empty:
             chart_df["Required level"] = required.iloc[-1]
-            colors.append("#D62728")
+            colors.append("#D62728B3")
         st.line_chart(chart_df, color=colors)
 
     st.subheader("Current level vs. required level")
