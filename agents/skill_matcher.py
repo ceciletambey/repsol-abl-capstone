@@ -9,6 +9,8 @@ recommending irrelevant courses - the self-corrective RAG loop.
 Loop is capped by state["loop_step"] to avoid infinite retries.
 """
 
+from concurrent.futures import ThreadPoolExecutor
+
 MAX_LOOPS = 3
 
 _llm = None
@@ -24,22 +26,27 @@ def get_llm():
 
 
 def grade_content_node(state):
-    """Grade each candidate chunk: relevant to the skill gap? Keep only 'yes'."""
+    """Grade each candidate chunk: relevant to the skill gap? Keep only 'yes'.
+    Each grading call is an independent LLM round-trip, so they're fired off
+    concurrently instead of waiting on one another one at a time."""
     gap = state["skill_gap"]
     candidates = state.get("candidate_content", [])
-    filtered = []
+    if not candidates:
+        return {"filtered_content": []}
 
-    for chunk in candidates:
+    def _is_relevant(chunk):
         prompt = (
             "You are grading whether a piece of learning content is relevant "
             f"to this skill gap:\n\nGAP: {gap}\n\nCONTENT: {chunk.get('text', '')}\n\n"
             "Answer with exactly one word: yes or no."
         )
         verdict = get_llm().invoke(prompt).content.strip().lower()
-        if verdict.startswith("yes"):
-            filtered.append(chunk)
+        return verdict.startswith("yes")
 
-    return {"filtered_content": filtered}
+    with ThreadPoolExecutor(max_workers=min(len(candidates), 6)) as pool:
+        keep = list(pool.map(_is_relevant, candidates))
+
+    return {"filtered_content": [c for c, ok in zip(candidates, keep) if ok]}
 
 
 def transform_query_node(state):

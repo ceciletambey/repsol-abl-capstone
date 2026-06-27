@@ -12,13 +12,32 @@ is the baseline the original assessment promised growth would be measured
 against.
 """
 
-import json
-import re
+from typing import Literal, Optional
 
 from langchain_google_genai import ChatGoogleGenerativeAI
+from pydantic import BaseModel, Field
 
 _llm = None
 NUM_QUESTIONS = 4
+
+
+class QuizQuestion(BaseModel):
+    type: Literal["self_report", "knowledge_check"]
+    text: str
+    options: list[str] = Field(description="Exactly 4 answer options.")
+    scores: Optional[list[int]] = Field(
+        default=None,
+        description="self_report only: each option's level 1-4, same order as options.")
+    correct: Optional[int] = Field(
+        default=None,
+        description="knowledge_check only: 0-based index of the correct option.")
+    explanation: Optional[str] = Field(
+        default=None,
+        description="knowledge_check only: which source the answer came from.")
+
+
+class Quiz(BaseModel):
+    questions: list[QuizQuestion] = Field(description=f"Exactly {NUM_QUESTIONS} questions.")
 
 
 def get_llm():
@@ -93,21 +112,13 @@ def _generate_quiz(skill, level, required_level, is_knowledge_gap, content):
         f"{NUM_QUESTIONS - 2} questions must be type 'knowledge_check': one "
         "objectively correct answer drawn directly from the sources above, 4 "
         "options, the 0-based correct index, and a short explanation that "
-        "cites which source it came from.\n\n"
-        f"Reply with ONLY a JSON array of exactly {NUM_QUESTIONS} question "
-        "objects, no other text, in this exact shape:\n"
-        '[{"type": "self_report", "text": "...", '
-        '"options": ["...", "...", "...", "..."], "scores": [1, 2, 3, 4]}, '
-        '{"type": "knowledge_check", "text": "...", '
-        '"options": ["...", "...", "...", "..."], "correct": 0, '
-        '"explanation": "..."}, ...]'
+        "cites which source it came from."
     )
 
-    raw = get_llm().invoke(prompt).content
-    match = re.search(r"\[.*\]", raw, re.S)
     try:
-        questions = json.loads(match.group(0)) if match else []
-    except (ValueError, TypeError):
+        quiz = get_llm().with_structured_output(Quiz).invoke(prompt)
+        questions = [q.model_dump(exclude_none=True) for q in quiz.questions]
+    except Exception:
         questions = []
     return [q for q in questions if _is_valid_question(q)]
 

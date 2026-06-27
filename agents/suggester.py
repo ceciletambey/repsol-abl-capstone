@@ -9,6 +9,7 @@ for an article - and never re-suggests a title the employee already saw.
 """
 
 import os
+import re
 
 from agents.curator import REPSOL_COURSES
 
@@ -38,6 +39,10 @@ def suggest_next(skill, after_level, required_level, verdict, seen_titles=None):
     return pick
 
 
+def _strip_markdown_headings(text):
+    return re.sub(r"(?m)^#+\s*", "", text).strip()
+
+
 def _next_repsol_course(skill, target_level, seen_titles):
     courses = [c for c in REPSOL_COURSES.get(skill, []) if c["title"] not in seen_titles]
     if not courses:
@@ -63,7 +68,10 @@ def _search_article(skill, target_level, seen_titles):
             if title and title not in seen_titles:
                 return {
                     "title": title,
-                    "text": r.get("content", ""),
+                    # Scraped articles/PDFs often start with their own
+                    # "# Title" line - left in, Streamlit renders the whole
+                    # paragraph as a giant markdown heading.
+                    "text": _strip_markdown_headings(r.get("content", "")),
                     "url": r.get("url"),
                     "source": "external",
                     "platform": "web",

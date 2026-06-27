@@ -624,9 +624,20 @@ elif page == "results":
     reassessment_results = st.session_state.setdefault("reassessment_results", {})
     suggestions = st.session_state.setdefault("suggestions", {})
 
+    def _gap_from_required(skill):
+        result = pipeline_results[skill]
+        required = result.get("reassessment", {}).get("required_level")
+        if required is None:
+            return float("-inf")
+        outcome = reassessment_results.get(skill)
+        current = outcome["final"] if outcome and not outcome.get("skipped") else result["detected_level"]
+        return required - current
+
     # One tab per skill, named by skill, instead of stacking every skill's
     # results into one long scroll - easier to locate a specific skill.
-    skills = list(pipeline_results.keys())
+    # Sorted so the skill furthest below its role's required level (the
+    # biggest priority) shows up first.
+    skills = sorted(pipeline_results.keys(), key=_gap_from_required, reverse=True)
     tabs = st.tabs(skills)
     for tab, skill in zip(tabs, skills):
         with tab:
@@ -674,9 +685,17 @@ elif page == "results":
                 st.session_state[saved_key] = True
 
             if skill not in suggestions:
+                # Tracks every title ever suggested for this skill across
+                # retake loops too (the `suggestions` dict itself gets
+                # cleared on retake), so the Suggester's "never repeat a
+                # title" promise holds across more than one cycle.
+                suggested_history = st.session_state.setdefault("suggested_titles", {})
                 seen_titles = {i.get("title") for i in result["final_nudge"]["items"] if i.get("title")}
+                seen_titles |= suggested_history.get(skill, set())
                 with st.spinner("Suggesting what to read next..."):
                     suggestions[skill] = suggest_next(skill, after, required, verdict, seen_titles)
+                if suggestions[skill].get("title"):
+                    suggested_history.setdefault(skill, set()).add(suggestions[skill]["title"])
             suggestion = suggestions[skill]
 
             st.markdown("**Suggested next read**")
